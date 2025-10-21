@@ -1,7 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import Links from "./Links";
 import { useState } from "react";
-import { cn } from "../../../utils/cn";
+import { cn } from "@/utils/cn";
 import AddTab from "./AddTab";
 import CloseWindow from "./CloseWindowButton";
 import MinimizedWindow from "./MinimizedWindowButton";
@@ -32,8 +32,8 @@ const WindowLists = ({ windows }: { windows: chrome.windows.Window[] }) => {
                 : "border-slate-300 border-1"
             )}
           >
-            <button
-              className="w-full min-w-0 flex justify-between items-center"
+            <div
+              className="w-full min-w-0 flex justify-between items-center cursor-pointer"
               onClick={() => toggleWindow(window.id!)}
             >
               <div className="flex items-center gap-4">
@@ -47,13 +47,14 @@ const WindowLists = ({ windows }: { windows: chrome.windows.Window[] }) => {
                 </div>
                 <h3 className="text-base truncate">{`윈도우 #${idx + 1}`}</h3>
               </div>
+
               <ChevronDown
                 className={cn(
                   "transition-transform duration-300 cursor-pointer text-slate-400",
                   isOpen ? "rotate-180" : ""
                 )}
               />
-            </button>
+            </div>
 
             <div
               className={cn(

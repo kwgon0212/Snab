@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { loadAllWindows } from "../../utils/windows";
-import WindowLists from "./components/WindowLists";
-import AddWindow from "./components/AddWindow";
+import { loadAllWindows } from "@/utils/windows";
+import WindowLists from "./components/Window/WindowLists";
+import AddWindow from "./components/Window/AddWindow";
+import Collections from "./components/Collections";
+import Header from "./components/Header";
 
 export default function App() {
   const [allWindows, setAllWindows] = useState<chrome.windows.Window[]>([]);
@@ -57,13 +59,20 @@ export default function App() {
     };
   }, []);
 
-  return (
-    <div className="w-screen h-screen flex flex-col overflow-hidden">
-      <header className="w-full h-20 bg-black/50 shrink-0">123</header>
-      <main className="grid grid-cols-[7fr_3fr] gap-5 w-full flex-1 p-5 min-h-0">
-        <section className="bg-black/10 h-full min-w-0"></section>
+  const openSession = (sessionId: string) => {
+    chrome.runtime.sendMessage({ type: "RESTORE_SESSION", id: sessionId });
+  };
 
-        <section className="h-full min-w-0 flex flex-col gap-2 overflow-hidden">
+  return (
+    <div className="w-screen h-screen min-w-[1000px] flex flex-col overflow-hidden">
+      <Header />
+
+      <main className="grid grid-cols-[7fr_3fr] gap-5 w-full flex-1 min-h-0">
+        <section className="h-full min-w-0">
+          <Collections onOpenSession={openSession} />
+        </section>
+
+        <section className="h-full min-w-0 flex flex-col gap-2 overflow-hidden p-5">
           <div className="flex-1 overflow-y-auto flex flex-col gap-2">
             <span className="text-slate-500">
               총 {allWindows.length}개의 윈도우
