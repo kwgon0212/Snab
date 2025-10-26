@@ -164,6 +164,19 @@ const Sidebar = ({ onWorkspaceChange }: SidebarProps) => {
     loadWorkspaceData();
   }, []);
 
+  // workspace-updated 이벤트 리스너
+  useEffect(() => {
+    const handleWorkspaceUpdated = () => {
+      loadWorkspaceData();
+    };
+
+    window.addEventListener("workspace-updated", handleWorkspaceUpdated);
+
+    return () => {
+      window.removeEventListener("workspace-updated", handleWorkspaceUpdated);
+    };
+  }, []);
+
   const loadWorkspaceData = async () => {
     try {
       const data = await loadWorkspaces();
@@ -283,15 +296,17 @@ const Sidebar = ({ onWorkspaceChange }: SidebarProps) => {
       try {
         const success = await deleteWorkspace(workspaceId);
         if (success) {
-          setWorkspaces((prev) => prev.filter((w) => w.id !== workspaceId));
+          const updatedWorkspaces = workspaces.filter(
+            (w) => w.id !== workspaceId
+          );
+          setWorkspaces(updatedWorkspaces);
 
-          // 삭제된 워크스페이스가 현재 활성 워크스페이스인 경우 다른 워크스페이스로 전환
+          // 삭제된 워크스페이스가 현재 활성 워크스페이스인 경우 첫 번째 워크스페이스로 전환
           if (activeWorkspaceId === workspaceId) {
-            const remainingWorkspaces = workspaces.filter(
-              (w) => w.id !== workspaceId
-            );
-            if (remainingWorkspaces.length > 0) {
-              setActiveWorkspaceId(remainingWorkspaces[0].id);
+            if (updatedWorkspaces.length > 0) {
+              const firstWorkspace = updatedWorkspaces[0];
+              setActiveWorkspaceId(firstWorkspace.id);
+              onWorkspaceChange(firstWorkspace);
             }
           }
         }

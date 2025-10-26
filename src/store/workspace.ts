@@ -266,6 +266,26 @@ const restoreGroupTabs = async (groupId: string, workspaceId: string) => {
   }
 };
 
+// 스냅샷 옵션 저장
+const saveSnapshotOption = async (closeWindows: boolean) => {
+  try {
+    await chrome.storage.local.set({ snapshotCloseWindows: closeWindows });
+  } catch (error) {
+    console.error("스냅샷 옵션 저장 실패:", error);
+  }
+};
+
+// 스냅샷 옵션 불러오기
+const loadSnapshotOption = async (): Promise<boolean> => {
+  try {
+    const result = await chrome.storage.local.get(["snapshotCloseWindows"]);
+    return result.snapshotCloseWindows || false;
+  } catch (error) {
+    console.error("스냅샷 옵션 불러오기 실패:", error);
+    return false;
+  }
+};
+
 export {
   createWorkspace,
   deleteWorkspace,
@@ -278,6 +298,8 @@ export {
   removeTabFromGroup,
   reorderGroupTabs,
   restoreGroupTabs,
+  saveSnapshotOption,
+  loadSnapshotOption,
 };
 
 export type { Workspace, Group, Tab };
