@@ -58,7 +58,7 @@ const SortableTab = ({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center gap-2 p-2 rounded-md hover:bg-slate-50 transition-colors duration-200 group min-w-0",
+        "flex items-center gap-2 p-2 rounded-md hover:bg-slate-50 transition-colors duration-200 group min-w-0 relative",
         isDragging && "opacity-50"
       )}
     >
@@ -75,10 +75,10 @@ const SortableTab = ({
           e.stopPropagation();
           onDeleteTab(groupId, tab.id);
         }}
-        className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:scale-110 rounded transition-all duration-200"
+        className="absolute -right-1 -top-1 opacity-0 group-hover:opacity-100 transition-all duration-300 p-1 rounded-full bg-red-500 hover:bg-red-600 shadow-sm"
         title="탭 삭제"
       >
-        <X className="size-3" />
+        <X className="size-2.5 text-white" />
       </button>
     </div>
   );
@@ -93,7 +93,7 @@ const DroppableGroup = ({ group, children }: DroppableGroupProps) => {
     <div
       ref={setNodeRef}
       className={cn(
-        "bg-white rounded-lg border border-slate-200 py-2 px-4 hover:shadow-lg transition-all duration-200 group-card h-fit break-inside-avoid mb-4 overflow-hidden",
+        "bg-white rounded-lg border border-slate-200 py-2 px-4 hover:shadow-sm transition-all duration-200 group-card h-fit break-inside-avoid mb-4 overflow-hidden",
         isOver && "border-blue-400 bg-blue-50"
       )}
     >

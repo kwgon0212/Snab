@@ -193,15 +193,21 @@ const Window = ({ window, index }: WindowProps) => {
                       <span className="text-sm">🌐</span>
                     </div>
                   )}
-                  <span className="text-sm truncate">{tab.title}</span>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-2">
-                    <button onClick={(e) => handleBookmark(e, tab)}>
+                  <span className="text-sm truncate flex-1">{tab.title}</span>
+                  <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-1">
+                    <button
+                      className="p-1 rounded-full bg-blue-500 hover:bg-blue-600 shadow-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookmark(e, tab);
+                      }}
+                    >
                       <Bookmark
                         className={cn(
-                          "size-4 hover:scale-120 transition-all duration-300",
+                          "size-2.5",
                           bookmarkedUrls.has(tab.url || "")
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-blue-400 hover:text-blue-600"
+                            ? "text-yellow-300 fill-yellow-300"
+                            : "text-white"
                         )}
                         fill={
                           bookmarkedUrls.has(tab.url || "")
@@ -212,15 +218,13 @@ const Window = ({ window, index }: WindowProps) => {
                       />
                     </button>
                     <button
+                      className="p-1 rounded-full bg-red-500 hover:bg-red-600 shadow-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCloseTab(tab.id!);
                       }}
                     >
-                      <X
-                        className="size-4 text-blue-400 hover:text-blue-600 hover:scale-120 transition-all duration-300"
-                        strokeWidth={1.5}
-                      />
+                      <X className="size-2.5 text-white" />
                     </button>
                   </div>
                 </Link>
