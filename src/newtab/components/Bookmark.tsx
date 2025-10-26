@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trash2, ChevronDown, BookmarkIcon } from "lucide-react";
+import { X, ChevronDown, BookmarkIcon } from "lucide-react";
 import {
   loadBookmarks,
   removeBookmark,
@@ -11,7 +11,7 @@ import { cn } from "@/utils/cn";
 const Bookmark = () => {
   const [bookmarks, setBookmarks] = useState<BookmarkData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // 북마크 불러오기
   const loadBookmarkData = async () => {
@@ -100,7 +100,7 @@ const Bookmark = () => {
                 .split("")
                 .reduce((a, b) => a + b.charCodeAt(0), 0)}
               onClick={() => handleBookmarkClick(bookmark.url)}
-              className="flex items-center gap-2 bg-white hover:shadow-sm px-4 py-2 transition-all duration-500 rounded-md group cursor-pointer"
+              className="flex items-center gap-2 bg-white hover:shadow-sm px-4 py-2 rounded-md group cursor-pointer relative transition-shadow duration-300"
             >
               {bookmark.faviconUrl ? (
                 <img
@@ -119,13 +119,13 @@ const Bookmark = () => {
               )}
               <span className="text-sm truncate flex-1">{bookmark.title}</span>
               <button
-                className="opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-500"
+                className="absolute -right-1 -top-1 opacity-0 group-hover:opacity-100 transition-all duration-300 p-1 rounded-full bg-red-500 hover:bg-red-600 shadow-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRemoveBookmark(bookmark.url);
                 }}
               >
-                <Trash2 className="size-4 text-red-500 hover:text-red-700 hover:scale-120 transition-all duration-500" />
+                <X className="size-2.5 text-white" />
               </button>
             </Link>
           ))}
