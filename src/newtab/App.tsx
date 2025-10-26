@@ -3,43 +3,23 @@ import { loadAllWindows } from "@/utils/windows";
 import Header from "./components/Header";
 import {
   DndContext,
-  DragEndEvent,
   DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
   closestCenter,
-  DragOverEvent,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
 import Window from "./components/Window";
 import { Plus } from "lucide-react";
 import Bookmark from "./components/Bookmark";
 import Workspace from "./components/workspace/Workspace";
-import { cn } from "@/utils/cn";
+import { useDragAndDrop } from "./hooks/useDragAndDrop";
+import { useSnapshot } from "./hooks/useSnapshot";
 
 export default function App() {
   const [allWindows, setAllWindows] = useState<chrome.windows.Window[]>([]);
-  const [activeTabId, setActiveTabId] = useState<number | null>(null);
-  const [activeGroupTab, setActiveGroupTab] = useState<any | null>(null);
   const [rightPanelWidth, setRightPanelWidth] = useState(400);
   const [isResizing, setIsResizing] = useState(false);
-  const [closeWindowsAfterSnapshot, setCloseWindowsAfterSnapshot] =
-    useState(false);
-
-  // 스냅샷 옵션 불러오기
-  useEffect(() => {
-    const loadSnapshotOption = async () => {
-      try {
-        const { loadSnapshotOption } = await import("@/store/workspace");
-        const option = await loadSnapshotOption();
-        setCloseWindowsAfterSnapshot(option);
-      } catch (error) {
-        console.error("스냅샷 옵션 불러오기 실패:", error);
-      }
-    };
-    loadSnapshotOption();
-  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -53,6 +33,28 @@ export default function App() {
     const windows = await loadAllWindows();
     setAllWindows(windows);
   };
+
+  // 커스텀 훅 사용
+  const {
+    activeTabId,
+    activeGroupTab,
+    handleDragOver,
+    handleDragEnd,
+    handleDragStart,
+  } = useDragAndDrop({
+    allWindows,
+    fetchWindows,
+    setAllWindows,
+  });
+
+  const {
+    closeWindowsAfterSnapshot,
+    handleSnapshot,
+    handleToggleCloseWindows,
+  } = useSnapshot({
+    allWindows,
+    fetchWindows,
+  });
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsResizing(true);
@@ -85,542 +87,22 @@ export default function App() {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isResizing]);
-
-  const handleDragStart = async (event: any) => {
-    setActiveTabId(event.active.id);
-
-    // 그룹 탭 드래그인 경우 탭 정보 가져오기
-    if (event.active.id.toString().startsWith("sortable-tab-")) {
-      try {
-        const { loadWorkspaces } = await import("@/store/workspace");
-        const workspaces = await loadWorkspaces();
-        const activeWorkspace = workspaces[0];
-
-        if (activeWorkspace) {
-          const tabId = event.active.id.toString().replace("sortable-tab-", "");
-
-          for (const group of activeWorkspace.groups) {
-            const tab = group.tabs.find((t) => t.id === tabId);
-            if (tab) {
-              setActiveGroupTab(tab);
-              break;
-            }
-          }
-        }
-      } catch (error) {
-        console.error("그룹 탭 정보 로드 실패:", error);
-      }
-    } else {
-      setActiveGroupTab(null);
-    }
-  };
-
-  const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) return;
-
-    // 같은 윈도우 내에서 탭 순서 변경인지 확인
-    const draggedTab = allWindows
-      .flatMap((w) => w.tabs || [])
-      .find((tab) => tab.id === active.id);
-
-    const targetTab = allWindows
-      .flatMap((w) => w.tabs || [])
-      .find((tab) => tab.id === over.id);
-
-    if (!draggedTab || !targetTab) return;
-
-    // 같은 윈도우 내에서만 실시간 UI 업데이트
-    if (draggedTab.windowId === targetTab.windowId) {
-      setAllWindows((windows) => {
-        return windows.map((window) => {
-          if (!window.tabs || window.id !== draggedTab.windowId) return window;
-
-          const oldIndex = window.tabs.findIndex((tab) => tab.id === active.id);
-          const newIndex = window.tabs.findIndex((tab) => tab.id === over.id);
-
-          if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
-            return {
-              ...window,
-              tabs: arrayMove(window.tabs, oldIndex, newIndex),
-            };
-          }
-
-          return window;
-        });
-      });
-    }
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) {
-      setActiveTabId(null);
-      // 드래그가 취소된 경우 원래 상태로 복원
-      fetchWindows();
-      return;
-    }
-
-    console.log("Drag ended:", {
-      active: active.id,
-      over: over.id,
-      overType: typeof over.id,
-      overString: over.id.toString(),
-    });
-
-    // 그룹 관련 드래그인지 확인
-    const isGroupDrag = active.id.toString().startsWith("sortable-tab-");
-
-    if (isGroupDrag) {
-      // 그룹 탭을 다른 그룹으로 드롭한 경우
-      if (over.id.toString().startsWith("droppable-group-")) {
-        try {
-          const { loadWorkspaces, removeTabFromGroup, addTabToGroup } =
-            await import("@/store/workspace");
-          const workspaces = await loadWorkspaces();
-          const activeWorkspace = workspaces[0];
-
-          if (activeWorkspace) {
-            const tabId = active.id.toString().replace("sortable-tab-", "");
-            const targetGroupId = over.id
-              .toString()
-              .replace("droppable-group-", "");
-
-            // 소스 그룹 찾기
-            let sourceGroupId = "";
-            let tabToMove = null;
-
-            for (const group of activeWorkspace.groups) {
-              const tab = group.tabs.find((t) => t.id === tabId);
-              if (tab) {
-                sourceGroupId = group.id;
-                tabToMove = tab;
-                break;
-              }
-            }
-
-            if (tabToMove && sourceGroupId && sourceGroupId !== targetGroupId) {
-              // 타겟 그룹에 탭 추가
-              await addTabToGroup(activeWorkspace.id, targetGroupId, tabToMove);
-
-              // 소스 그룹에서 탭 제거
-              await removeTabFromGroup(
-                activeWorkspace.id,
-                sourceGroupId,
-                tabId
-              );
-
-              // 워크스페이스 업데이트 이벤트 발생
-              window.dispatchEvent(new CustomEvent("workspace-updated"));
-              setActiveTabId(null);
-              setActiveGroupTab(null);
-              return;
-            }
-          }
-        } catch (error) {
-          console.error("그룹 간 탭 이동 실패:", error);
-        }
-      }
-
-      // 같은 그룹 내에서 탭 순서 변경인지 확인
-      if (over.id.toString().startsWith("sortable-tab-")) {
-        try {
-          const { loadWorkspaces, reorderGroupTabs } = await import(
-            "@/store/workspace"
-          );
-          const workspaces = await loadWorkspaces();
-          const activeWorkspace = workspaces[0];
-
-          if (activeWorkspace) {
-            const activeTabIdStr = active.id
-              .toString()
-              .replace("sortable-tab-", "");
-            const overTabIdStr = over.id
-              .toString()
-              .replace("sortable-tab-", "");
-
-            // 어떤 그룹에 속하는지 찾기
-            for (const group of activeWorkspace.groups) {
-              const activeTabIndex = group.tabs.findIndex(
-                (t) => t.id === activeTabIdStr
-              );
-              const overTabIndex = group.tabs.findIndex(
-                (t) => t.id === overTabIdStr
-              );
-
-              // 같은 그룹에 있는 경우
-              if (activeTabIndex !== -1 && overTabIndex !== -1) {
-                // 탭 순서 재정렬
-                const reorderedTabs = [...group.tabs];
-                const [movedTab] = reorderedTabs.splice(activeTabIndex, 1);
-                reorderedTabs.splice(overTabIndex, 0, movedTab);
-
-                const newTabIds = reorderedTabs.map((t) => t.id);
-
-                // 순서 업데이트
-                await reorderGroupTabs(activeWorkspace.id, group.id, newTabIds);
-
-                // 워크스페이스 업데이트 이벤트 발생
-                window.dispatchEvent(new CustomEvent("workspace-updated"));
-                setActiveTabId(null);
-                return;
-              }
-            }
-          }
-        } catch (error) {
-          console.error("그룹 내 탭 순서 변경 실패:", error);
-        }
-      }
-
-      // 그룹 탭을 윈도우로 드롭한 경우
-      const overIdStr = over.id.toString();
-      let targetWindowId: number | null = null;
-
-      console.log(
-        "그룹 드래그 - over.id:",
-        over.id,
-        "over.id 타입:",
-        typeof over.id
-      );
-
-      if (overIdStr.startsWith("window-")) {
-        // window- prefix가 있는 경우
-        targetWindowId = parseInt(overIdStr.replace("window-", ""));
-      } else if (!isNaN(parseInt(overIdStr))) {
-        // 숫자인 경우 - 윈도우 ID인지 탭 ID인지 확인
-        const numId = parseInt(overIdStr);
-
-        // allWindows에서 해당 ID가 탭인지 윈도우인지 확인
-        const isTab = allWindows.some((w) =>
-          w.tabs?.some((t) => t.id === numId)
-        );
-
-        if (!isTab) {
-          // 탭이 아니면 윈도우 ID로 취급
-          targetWindowId = numId;
-        } else {
-          // 탭인 경우, 해당 탭이 속한 윈도우 찾기
-          for (const w of allWindows) {
-            if (w.tabs?.some((t) => t.id === numId)) {
-              targetWindowId = w.id || null;
-              break;
-            }
-          }
-        }
-      }
-
-      console.log("추출된 윈도우 ID:", targetWindowId);
-
-      if (targetWindowId !== null) {
-        const tabId = active.id.toString().replace("sortable-tab-", "");
-
-        try {
-          // 워크스페이스에서 탭 찾기
-          const { loadWorkspaces, removeTabFromGroup } = await import(
-            "@/store/workspace"
-          );
-          const workspaces = await loadWorkspaces();
-          const activeWorkspace = workspaces[0];
-
-          if (activeWorkspace) {
-            // 탭을 찾고 그룹에서 제거
-            for (const group of activeWorkspace.groups) {
-              const tab = group.tabs.find((t) => t.id === tabId);
-              if (tab) {
-                // 윈도우가 실제로 존재하는지 확인
-                try {
-                  await chrome.windows.get(targetWindowId);
-
-                  // 윈도우에 탭 추가
-                  await chrome.tabs.create({
-                    url: tab.url,
-                    windowId: targetWindowId,
-                    active: false,
-                  });
-
-                  // 그룹에서 탭 제거
-                  await removeTabFromGroup(activeWorkspace.id, group.id, tabId);
-
-                  // 워크스페이스 업데이트 이벤트 발생
-                  window.dispatchEvent(new CustomEvent("workspace-updated"));
-                } catch (windowError) {
-                  console.error("윈도우 접근 실패:", windowError);
-                  // 윈도우가 없으면 현재 포커스된 윈도우에 추가
-                  const currentWindow = await chrome.windows.getCurrent();
-                  await chrome.tabs.create({
-                    url: tab.url,
-                    windowId: currentWindow.id,
-                    active: false,
-                  });
-                  await removeTabFromGroup(activeWorkspace.id, group.id, tabId);
-                  window.dispatchEvent(new CustomEvent("workspace-updated"));
-                }
-                break;
-              }
-            }
-          }
-        } catch (error) {
-          console.error("그룹에서 윈도우로 탭 이동 실패:", error);
-        }
-      }
-
-      setActiveTabId(null);
-      return;
-    }
-
-    // 드래그된 탭 정보 찾기 (윈도우 탭들만)
-    const draggedTab = allWindows
-      .flatMap((w) => w.tabs || [])
-      .find((tab) => tab.id === active.id);
-
-    if (!draggedTab) {
-      console.error("드래그된 탭을 찾을 수 없습니다");
-      setActiveTabId(null);
-      return;
-    }
-
-    console.log("드래그된 탭:", draggedTab);
-
-    // 그룹으로 드롭된 경우
-    if (over.id.toString().startsWith("droppable-group-")) {
-      console.log("그룹으로 드롭 감지됨");
-      const groupId = over.id.toString().replace("droppable-group-", "");
-
-      try {
-        // 워크스페이스 데이터 로드
-        const { loadWorkspaces, addTabToGroup } = await import(
-          "@/store/workspace"
-        );
-        const workspaces = await loadWorkspaces();
-
-        // 현재 활성 워크스페이스 찾기 (첫 번째 워크스페이스 사용)
-        const activeWorkspace = workspaces[0];
-        if (activeWorkspace) {
-          const tabData = {
-            id: `group-${Date.now()}-${Math.random()
-              .toString(36)
-              .substr(2, 9)}`,
-            originalId: draggedTab.id!,
-            title: draggedTab.title || "",
-            url: draggedTab.url || "",
-            favIconUrl: draggedTab.favIconUrl,
-            windowId: draggedTab.windowId!,
-          };
-
-          await addTabToGroup(activeWorkspace.id, groupId, tabData);
-          console.log("탭이 그룹에 추가되었습니다");
-
-          // 탭을 닫기
-          try {
-            await chrome.tabs.remove(active.id as number);
-            console.log("탭이 닫혔습니다");
-          } catch (error) {
-            console.error("탭 닫기 실패:", error);
-          }
-
-          // 워크스페이스 데이터 새로고침을 위한 이벤트 발생
-          window.dispatchEvent(new CustomEvent("workspace-updated"));
-        }
-      } catch (error) {
-        console.error("탭을 그룹에 추가 실패:", error);
-      }
-
-      setActiveTabId(null);
-      return;
-    }
-
-    // 윈도우로 드롭된 경우 (윈도우 간 이동) - 우선 처리
-    if (over.id.toString().startsWith("window-")) {
-      console.log("윈도우로 드롭 감지됨");
-      const targetWindowId = parseInt(
-        over.id.toString().replace("window-", "")
-      );
-
-      console.log(
-        `현재 윈도우: ${draggedTab.windowId}, 대상 윈도우: ${targetWindowId}`
-      );
-
-      if (draggedTab.windowId !== targetWindowId) {
-        try {
-          console.log(`탭 ${active.id}을 윈도우 ${targetWindowId}로 이동`);
-
-          // 탭을 다른 윈도우로 이동
-          await chrome.tabs.move(active.id as number, {
-            windowId: targetWindowId,
-            index: -1, // 맨 끝에 추가
-          });
-
-          console.log("탭 이동 완료");
-
-          // UI 상태 업데이트
-          fetchWindows();
-        } catch (error) {
-          console.error("탭 이동 실패:", error);
-          fetchWindows();
-        }
-      } else {
-        console.log("같은 윈도우로 드롭됨 - 이동하지 않음");
-      }
-    } else if (over.id && !over.id.toString().startsWith("window-")) {
-      // 탭으로 드롭된 경우
-      const targetTab = allWindows
-        .flatMap((w) => w.tabs || [])
-        .find((tab) => tab.id === over.id);
-
-      if (targetTab) {
-        // 다른 윈도우의 탭으로 드롭된 경우 (윈도우 간 이동)
-        if (draggedTab.windowId !== targetTab.windowId) {
-          try {
-            console.log(
-              `탭 ${active.id}을 윈도우 ${targetTab.windowId}로 이동 (탭 위로 드롭)`
-            );
-
-            // 탭을 다른 윈도우로 이동
-            await chrome.tabs.move(active.id as number, {
-              windowId: targetTab.windowId,
-              index: targetTab.index || 0,
-            });
-
-            fetchWindows();
-          } catch (error) {
-            console.error("탭 이동 실패:", error);
-            fetchWindows();
-          }
-        } else {
-          // 같은 윈도우 내 순서 변경
-          try {
-            console.log(`탭 ${active.id}을 탭 ${over.id} 위치로 이동`);
-
-            // Chrome API를 사용하여 실제 탭 순서 변경
-            const targetIndex = targetTab.index || 0;
-            await chrome.tabs.move(active.id as number, {
-              windowId: draggedTab.windowId,
-              index: targetIndex,
-            });
-
-            fetchWindows();
-          } catch (error) {
-            console.error("탭 순서 변경 실패:", error);
-            fetchWindows();
-          }
-        }
-      }
-    }
-
-    // 드래그 종료 시 activeTabId 초기화
-    setActiveTabId(null);
-    setActiveGroupTab(null);
-  };
 
   const handleCreateWindow = async () => {
     await chrome.windows.create({});
     fetchWindows();
   };
 
-  const handleSnapshot = async () => {
-    try {
-      // 새 워크스페이스 생성
-      const { createWorkspace, createGroup, addTabToGroup } = await import(
-        "@/store/workspace"
-      );
-
-      // 날짜 기반 워크스페이스 이름
-      const workspaceName = new Date().toLocaleString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      const newWorkspace = await createWorkspace(workspaceName);
-
-      if (!newWorkspace) {
-        alert("스냅샷 저장에 실패했습니다.");
-        return;
-      }
-
-      // 각 윈도우를 그룹으로 변환
-      for (const window of allWindows) {
-        if (!window.tabs || window.tabs.length === 0) continue;
-
-        const groupName = `Window ${window.id}`;
-        const newGroup = await createGroup(newWorkspace.id, groupName);
-
-        if (!newGroup) continue;
-
-        // 윈도우의 탭들을 그룹에 추가
-        for (const tab of window.tabs) {
-          if (!tab.url) continue;
-
-          const tabData = {
-            id: `snapshot-${Date.now()}-${Math.random()
-              .toString(36)
-              .substr(2, 9)}`,
-            originalId: tab.id,
-            title: tab.title || "",
-            url: tab.url,
-            favIconUrl: tab.favIconUrl,
-            windowId: window.id || 0,
-          };
-
-          await addTabToGroup(newWorkspace.id, newGroup.id, tabData);
-        }
-      }
-
-      // 워크스페이스 업데이트 이벤트 발생
-      window.dispatchEvent(new CustomEvent("workspace-updated"));
-
-      // 윈도우 닫기 옵션이 꺼져있으면 모든 윈도우 닫기 (스위치가 OFF일 때 닫기)
-      if (!closeWindowsAfterSnapshot) {
-        const closePromises = allWindows
-          .map((w) => w.id)
-          .filter((id): id is number => id !== undefined)
-          .map((id) => chrome.windows.remove(id));
-
-        await Promise.all(closePromises);
-        fetchWindows();
-      }
-
-      alert("스냅샷이 저장되었습니다.");
-    } catch (error) {
-      console.error("스냅샷 저장 실패:", error);
-      alert("스냅샷 저장에 실패했습니다.");
-    }
-  };
-
-  const handleToggleCloseWindows = async () => {
-    const newValue = !closeWindowsAfterSnapshot;
-    setCloseWindowsAfterSnapshot(newValue);
-
-    // 스토리지에 저장
-    try {
-      const { saveSnapshotOption } = await import("@/store/workspace");
-      await saveSnapshotOption(newValue);
-    } catch (error) {
-      console.error("스냅샷 옵션 저장 실패:", error);
-    }
-  };
-
   useEffect(() => {
-    // 초기 로드
     fetchWindows();
 
-    // 탭 생성 시 자동 업데이트
     chrome.tabs.onCreated.addListener(fetchWindows);
-    // 탭 업데이트 시 자동 업데이트
     chrome.tabs.onUpdated.addListener(fetchWindows);
-    // 탭 제거 시 자동 업데이트
     chrome.tabs.onRemoved.addListener(fetchWindows);
-    // 윈도우 상태 변경 시 자동 업데이트 (전체화면, 최소화 등)
     chrome.windows.onBoundsChanged.addListener(fetchWindows);
     chrome.windows.onFocusChanged.addListener(fetchWindows);
 
-    // cleanup: 컴포넌트 unmount 시 리스너 제거
     return () => {
       chrome.tabs.onCreated.removeListener(fetchWindows);
       chrome.tabs.onUpdated.removeListener(fetchWindows);
@@ -651,7 +133,6 @@ export default function App() {
             <Workspace />
           </section>
 
-          {/* 리사이즈 핸들 */}
           <div
             className="w-[1px] bg-slate-300 hover:bg-blue-400 cursor-col-resize transition-all duration-300 z-30 relative"
             onMouseDown={handleMouseDown}

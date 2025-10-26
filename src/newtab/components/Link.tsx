@@ -1,38 +1,6 @@
-import { useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import React from "react";
-import { cn } from "@/utils/cn";
-
-interface LinkProps {
-  url: string;
-  title: string;
-  faviconUrl: string;
-  favIconUrl: string;
-}
-
-// active: false
-// audible: false
-// autoDiscardable: true
-// discarded: false
-// favIconUrl: "https://lucide.dev/favicon.ico"
-// frozen: false
-// groupId: -1
-// height: 1004
-// highlighted: false
-// id: 1106932339
-// incognito: false
-// index: 0
-// lastAccessed: 1761032684314.845
-// mutedInfo: {muted: false}
-// pinned: false
-// selected: false
-// splitViewId: -1
-// status: "complete"
-// title: "Lucide"
-// url: "https://lucide.dev/icons/?search=folder"
-// width: 1800
-// windowId: 1106932321
 
 const Link = ({
   id,

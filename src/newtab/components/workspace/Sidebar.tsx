@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Folder, Settings, Edit2, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Folder, Edit2, Trash2 } from "lucide-react";
 import {
   loadWorkspaces,
   createWorkspace,
@@ -213,10 +213,8 @@ const Sidebar = ({ onWorkspaceChange }: SidebarProps) => {
   };
 
   const handleWorkspaceClick = (workspaceId: string) => {
-    console.log("워크스페이스 클릭됨:", workspaceId);
     setActiveWorkspaceId(workspaceId);
     const workspace = workspaces.find((w) => w.id === workspaceId);
-    console.log("찾은 워크스페이스:", workspace);
     onWorkspaceChange(workspace || null);
   };
 

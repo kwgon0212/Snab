@@ -10,19 +10,15 @@ import { cn } from "@/utils/cn";
 
 const Bookmark = () => {
   const [bookmarks, setBookmarks] = useState<BookmarkData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
 
   // 북마크 불러오기
   const loadBookmarkData = async () => {
     try {
-      setIsLoading(true);
       const bookmarkData = await loadBookmarks();
       setBookmarks(bookmarkData);
     } catch (error) {
       console.error("북마크 불러오기 실패:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

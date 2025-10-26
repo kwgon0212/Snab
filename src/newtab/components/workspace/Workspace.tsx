@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { cn } from "@/utils/cn";
-import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Content from "./Content";
 import { type Workspace } from "@/store/workspace";
 
