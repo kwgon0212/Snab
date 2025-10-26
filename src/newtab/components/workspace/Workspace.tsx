@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { cn } from "@/utils/cn";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Content from "./Content";
 import { type Workspace } from "@/store/workspace";
 
@@ -91,24 +91,32 @@ const Workspace = () => {
       <button
         onClick={toggleSidebar}
         className={cn(
-          "absolute top-1/2 -translate-y-1/2 w-8 h-12 bg-white border border-slate-200 hover:border-blue-400 text-slate-400 hover:text-blue-500 rounded-full flex items-center justify-center shadow-sm hover:shadow-md backdrop-blur-sm z-30 transition-all duration-300",
+          "fixed bottom-5 left-5 box-content bg-white border border-slate-200 hover:border-blue-400 text-slate-400 hover:text-blue-500 rounded-full flex items-center justify-center shadow-sm hover:shadow-md backdrop-blur-sm z-30 transition-all duration-300",
           !isResizing && "transition-all duration-300"
         )}
-        style={{
-          left: isCollapsed ? "0px" : `${sidebarWidth}px`,
-          transform: isCollapsed
-            ? "translateY(-50%) translateX(0)"
-            : "translateY(-50%) translateX(-50%)",
-          opacity: isCollapsed ? 0.6 : 1,
-        }}
         title={isCollapsed ? "사이드바 열기" : "사이드바 닫기"}
       >
-        <ChevronRight
-          className={cn(
-            "w-4 h-4 transition-transform duration-300 ease-in-out",
-            isCollapsed ? "rotate-0" : "rotate-180"
-          )}
-        />
+        <div className="relative size-10">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <PanelLeftClose
+              className={cn(
+                "size-6 transition-opacity duration-300 ease-in-out",
+                isCollapsed && "opacity-0"
+              )}
+              strokeWidth={1.2}
+            />
+          </div>
+
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <PanelLeftOpen
+              className={cn(
+                "size-6 transition-opacity duration-300 ease-in-out",
+                !isCollapsed && "opacity-0"
+              )}
+              strokeWidth={1.2}
+            />
+          </div>
+        </div>
       </button>
 
       <Content

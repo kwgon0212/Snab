@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trash2, ChevronDown } from "lucide-react";
+import { Trash2, ChevronDown, BookmarkIcon } from "lucide-react";
 import {
   loadBookmarks,
   removeBookmark,
@@ -69,7 +69,12 @@ const Bookmark = () => {
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-slate-50 transition-colors"
       >
-        <h3 className="text-sm font-semibold text-slate-600">
+        <h3 className="text-sm font-semibold text-slate-600 flex items-center gap-2">
+          <BookmarkIcon
+            className={
+              "size-4 hover:scale-120 transition-all duration-300 text-yellow-500 fill-yellow-500"
+            }
+          />
           북마크 ({bookmarks.length})
         </h3>
         <ChevronDown
@@ -95,7 +100,7 @@ const Bookmark = () => {
                 .split("")
                 .reduce((a, b) => a + b.charCodeAt(0), 0)}
               onClick={() => handleBookmarkClick(bookmark.url)}
-              className="flex items-center gap-2 bg-white hover:shadow-sm hover:pr-10 px-4 py-2 transition-all duration-500 rounded-md relative group cursor-pointer"
+              className="flex items-center gap-2 bg-white hover:shadow-sm px-4 py-2 transition-all duration-500 rounded-md group cursor-pointer"
             >
               {bookmark.faviconUrl ? (
                 <img
@@ -112,9 +117,9 @@ const Bookmark = () => {
                   <span className="text-sm">🌐</span>
                 </div>
               )}
-              <span className="text-sm truncate">{bookmark.title}</span>
+              <span className="text-sm truncate flex-1">{bookmark.title}</span>
               <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500"
+                className="opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-500"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRemoveBookmark(bookmark.url);
