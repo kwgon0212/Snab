@@ -463,6 +463,10 @@ export default function App() {
                   }
                   alt=""
                   className="size-4 rounded-sm"
+                  style={{
+                    filter:
+                      "drop-shadow(0 0 0.1px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.35))",
+                  }}
                 />
               ) : (
                 <div className="size-4 rounded-sm flex items-center justify-center">

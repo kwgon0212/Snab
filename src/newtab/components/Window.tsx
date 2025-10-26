@@ -183,6 +183,10 @@ const Window = ({ window, index }: WindowProps) => {
                       src={tab.favIconUrl}
                       alt={tab.title}
                       className="size-4 rounded-sm"
+                      style={{
+                        filter:
+                          "drop-shadow(0 0 0.1px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.35))",
+                      }}
                     />
                   ) : (
                     <div className="size-4 rounded-sm flex items-center justify-center">

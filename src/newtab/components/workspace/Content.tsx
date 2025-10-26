@@ -426,6 +426,10 @@ const Content = ({ activeWorkspace, onWorkspaceUpdate }: ContentProps) => {
                             src={tab.favIconUrl}
                             alt=""
                             className="size-4 rounded-sm flex-shrink-0"
+                            style={{
+                              filter:
+                                "drop-shadow(0 0 0.1px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.35))",
+                            }}
                           />
                         ) : (
                           <div className="size-4 rounded-sm bg-slate-200 flex items-center justify-center flex-shrink-0">
