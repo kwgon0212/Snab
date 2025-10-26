@@ -160,6 +160,56 @@ export default function App() {
     const isGroupDrag = active.id.toString().startsWith("sortable-tab-");
 
     if (isGroupDrag) {
+      // 그룹 탭을 다른 그룹으로 드롭한 경우
+      if (over.id.toString().startsWith("droppable-group-")) {
+        try {
+          const { loadWorkspaces, removeTabFromGroup, addTabToGroup } =
+            await import("@/store/workspace");
+          const workspaces = await loadWorkspaces();
+          const activeWorkspace = workspaces[0];
+
+          if (activeWorkspace) {
+            const tabId = active.id.toString().replace("sortable-tab-", "");
+            const targetGroupId = over.id
+              .toString()
+              .replace("droppable-group-", "");
+
+            // 소스 그룹 찾기
+            let sourceGroupId = "";
+            let tabToMove = null;
+
+            for (const group of activeWorkspace.groups) {
+              const tab = group.tabs.find((t) => t.id === tabId);
+              if (tab) {
+                sourceGroupId = group.id;
+                tabToMove = tab;
+                break;
+              }
+            }
+
+            if (tabToMove && sourceGroupId && sourceGroupId !== targetGroupId) {
+              // 타겟 그룹에 탭 추가
+              await addTabToGroup(activeWorkspace.id, targetGroupId, tabToMove);
+
+              // 소스 그룹에서 탭 제거
+              await removeTabFromGroup(
+                activeWorkspace.id,
+                sourceGroupId,
+                tabId
+              );
+
+              // 워크스페이스 업데이트 이벤트 발생
+              window.dispatchEvent(new CustomEvent("workspace-updated"));
+              setActiveTabId(null);
+              setActiveGroupTab(null);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("그룹 간 탭 이동 실패:", error);
+        }
+      }
+
       // 같은 그룹 내에서 탭 순서 변경인지 확인
       if (over.id.toString().startsWith("sortable-tab-")) {
         try {
