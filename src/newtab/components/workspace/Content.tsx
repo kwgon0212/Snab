@@ -23,9 +23,10 @@ const Content = ({ activeWorkspace, onWorkspaceUpdate }: ContentProps) => {
   const [editingGroupName, setEditingGroupName] = useState("");
 
   // 워크스페이스 업데이트 이벤트 리스너
+  // 그룹 편집 중일 때는 업데이트를 무시
   useEffect(() => {
     const handleWorkspaceUpdate = async () => {
-      if (activeWorkspace && onWorkspaceUpdate) {
+      if (activeWorkspace && onWorkspaceUpdate && !editingGroupId) {
         const updatedWorkspaces = await loadWorkspaces();
         const updatedWorkspace = updatedWorkspaces.find(
           (w) => w.id === activeWorkspace.id
@@ -41,7 +42,7 @@ const Content = ({ activeWorkspace, onWorkspaceUpdate }: ContentProps) => {
     return () => {
       window.removeEventListener("workspace-updated", handleWorkspaceUpdate);
     };
-  }, [activeWorkspace, onWorkspaceUpdate]);
+  }, [activeWorkspace, onWorkspaceUpdate, editingGroupId]);
 
   const handleCreateGroup = async () => {
     if (!activeWorkspace) return;
@@ -136,6 +137,13 @@ const Content = ({ activeWorkspace, onWorkspaceUpdate }: ContentProps) => {
         editingGroupName.trim()
       );
       if (success) {
+        // 편집 상태를 먼저 초기화
+        setEditingGroupId(null);
+        setEditingGroupName("");
+
+        // 워크스페이스 업데이트 이벤트 발생
+        window.dispatchEvent(new CustomEvent("workspace-updated"));
+
         // 워크스페이스 데이터 새로고침
         const updatedWorkspaces = await loadWorkspaces();
         const updatedWorkspace = updatedWorkspaces.find(
@@ -145,10 +153,10 @@ const Content = ({ activeWorkspace, onWorkspaceUpdate }: ContentProps) => {
           onWorkspaceUpdate(updatedWorkspace);
         }
       }
-      setEditingGroupId(null);
-      setEditingGroupName("");
     } catch (error) {
       // 에러 발생 시 조용히 처리
+      setEditingGroupId(null);
+      setEditingGroupName("");
     }
   };
 
