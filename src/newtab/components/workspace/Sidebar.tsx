@@ -224,6 +224,14 @@ const Sidebar = ({ onWorkspaceChange }: SidebarProps) => {
         );
         if (workspaceToSave) {
           await saveWorkspace(workspaceToSave);
+
+          // 워크스페이스 업데이트 이벤트 발생
+          window.dispatchEvent(new CustomEvent("workspace-updated"));
+
+          // 현재 활성 워크스페이스인 경우 부모 컴포넌트에 업데이트된 워크스페이스 전달
+          if (activeWorkspaceId === editingWorkspaceId) {
+            onWorkspaceChange(workspaceToSave);
+          }
         }
 
         setEditingWorkspaceId(null);
