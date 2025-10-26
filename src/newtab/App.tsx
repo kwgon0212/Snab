@@ -21,6 +21,7 @@ import { cn } from "@/utils/cn";
 export default function App() {
   const [allWindows, setAllWindows] = useState<chrome.windows.Window[]>([]);
   const [activeTabId, setActiveTabId] = useState<number | null>(null);
+  const [activeGroupTab, setActiveGroupTab] = useState<any | null>(null);
   const [rightPanelWidth, setRightPanelWidth] = useState(400);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -71,8 +72,33 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isResizing]);
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = async (event: any) => {
     setActiveTabId(event.active.id);
+
+    // 그룹 탭 드래그인 경우 탭 정보 가져오기
+    if (event.active.id.toString().startsWith("sortable-tab-")) {
+      try {
+        const { loadWorkspaces } = await import("@/store/workspace");
+        const workspaces = await loadWorkspaces();
+        const activeWorkspace = workspaces[0];
+
+        if (activeWorkspace) {
+          const tabId = event.active.id.toString().replace("sortable-tab-", "");
+
+          for (const group of activeWorkspace.groups) {
+            const tab = group.tabs.find((t) => t.id === tabId);
+            if (tab) {
+              setActiveGroupTab(tab);
+              break;
+            }
+          }
+        }
+      } catch (error) {
+        console.error("그룹 탭 정보 로드 실패:", error);
+      }
+    } else {
+      setActiveGroupTab(null);
+    }
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -134,6 +160,56 @@ export default function App() {
     const isGroupDrag = active.id.toString().startsWith("sortable-tab-");
 
     if (isGroupDrag) {
+      // 같은 그룹 내에서 탭 순서 변경인지 확인
+      if (over.id.toString().startsWith("sortable-tab-")) {
+        try {
+          const { loadWorkspaces, reorderGroupTabs } = await import(
+            "@/store/workspace"
+          );
+          const workspaces = await loadWorkspaces();
+          const activeWorkspace = workspaces[0];
+
+          if (activeWorkspace) {
+            const activeTabIdStr = active.id
+              .toString()
+              .replace("sortable-tab-", "");
+            const overTabIdStr = over.id
+              .toString()
+              .replace("sortable-tab-", "");
+
+            // 어떤 그룹에 속하는지 찾기
+            for (const group of activeWorkspace.groups) {
+              const activeTabIndex = group.tabs.findIndex(
+                (t) => t.id === activeTabIdStr
+              );
+              const overTabIndex = group.tabs.findIndex(
+                (t) => t.id === overTabIdStr
+              );
+
+              // 같은 그룹에 있는 경우
+              if (activeTabIndex !== -1 && overTabIndex !== -1) {
+                // 탭 순서 재정렬
+                const reorderedTabs = [...group.tabs];
+                const [movedTab] = reorderedTabs.splice(activeTabIndex, 1);
+                reorderedTabs.splice(overTabIndex, 0, movedTab);
+
+                const newTabIds = reorderedTabs.map((t) => t.id);
+
+                // 순서 업데이트
+                await reorderGroupTabs(activeWorkspace.id, group.id, newTabIds);
+
+                // 워크스페이스 업데이트 이벤트 발생
+                window.dispatchEvent(new CustomEvent("workspace-updated"));
+                setActiveTabId(null);
+                return;
+              }
+            }
+          }
+        } catch (error) {
+          console.error("그룹 내 탭 순서 변경 실패:", error);
+        }
+      }
+
       // 그룹 탭을 윈도우로 드롭한 경우
       const overIdStr = over.id.toString();
       let targetWindowId: number | null = null;
@@ -371,6 +447,7 @@ export default function App() {
 
     // 드래그 종료 시 activeTabId 초기화
     setActiveTabId(null);
+    setActiveGroupTab(null);
   };
 
   const handleCreateWindow = async () => {
@@ -450,7 +527,26 @@ export default function App() {
         </main>
 
         <DragOverlay>
-          {activeTabId ? (
+          {activeGroupTab ? (
+            <div className="flex items-center gap-2 bg-white p-2 rounded-md hover:bg-slate-50 shadow-lg opacity-90 min-w-[200px]">
+              {activeGroupTab.favIconUrl ? (
+                <img
+                  src={activeGroupTab.favIconUrl}
+                  alt=""
+                  className="size-4 rounded-sm flex-shrink-0"
+                  style={{
+                    filter:
+                      "drop-shadow(0 0 0.1px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.35))",
+                  }}
+                />
+              ) : (
+                <div className="size-4 rounded-sm bg-slate-200 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs">🌐</span>
+                </div>
+              )}
+              <span className="text-sm truncate">{activeGroupTab.title}</span>
+            </div>
+          ) : activeTabId ? (
             <div className="flex items-center gap-2 w-full bg-white p-2 rounded-md shadow-lg opacity-90">
               {allWindows
                 .flatMap((w) => w.tabs || [])
