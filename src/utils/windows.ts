@@ -6,21 +6,20 @@ export const loadAllWindows = async () => {
   });
 
   const windows = await chrome.windows.getAll({ populate: true });
-  return windows;
 
-  // const filteredWindows = windows.map((window) => ({
-  //   ...window,
-  //   tabs:
-  //     window.tabs?.filter((tab) => {
-  //       const url = tab.url || "";
-  //       const isCurrentTab = tab.id === currentTab?.id;
-  //       const isChromeUrl =
-  //         url.startsWith("chrome://") || url.startsWith("chrome-extension://");
+  const filteredWindows = windows.map((window: chrome.windows.Window) => ({
+    ...window,
+    tabs:
+      window.tabs?.filter((tab: chrome.tabs.Tab) => {
+        const url = tab.url || "";
+        const isCurrentTab = tab.id === currentTab?.id;
+        const isChromeUrl =
+          url.startsWith("chrome://") || url.startsWith("chrome-extension://");
 
-  //       return !isCurrentTab && !isChromeUrl;
-  //     }) || [],
-  // }));
-  // return filteredWindows;
+        return !isCurrentTab && !isChromeUrl;
+      }) || [],
+  }));
+  return filteredWindows;
 };
 
 export const loadCurrentWindow = async () => {
