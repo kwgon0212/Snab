@@ -1,7 +1,13 @@
 // import TempStorage from "./TempStorage";
+import { useState, useEffect, useRef } from "react";
 import logo from "@/assets/logo.png";
-import { Camera } from "lucide-react";
+import { Camera, Download, Upload, MoreHorizontal } from "lucide-react";
 import { cn } from "@/utils/cn";
+import {
+  downloadDataAsJSON,
+  selectAndImportJSON,
+  importDataFromJSON,
+} from "@/utils/dataExport";
 
 interface HeaderProps {
   onSnapshot: () => void;
@@ -14,6 +20,51 @@ const Header = ({
   closeWindowsAfterSnapshot,
   onToggleCloseWindows,
 }: HeaderProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 메뉴 외부 클릭 시 메뉴 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  // 데이터 내보내기
+  const handleExportData = async () => {
+    try {
+      await downloadDataAsJSON();
+      alert("데이터가 성공적으로 내보내졌습니다.");
+      setIsMenuOpen(false);
+    } catch (error) {
+      alert("데이터 내보내기에 실패했습니다.");
+    }
+  };
+
+  // 데이터 가져오기
+  const handleImportData = async () => {
+    try {
+      const file = await selectAndImportJSON();
+      if (file) {
+        await importDataFromJSON(file);
+        alert("데이터가 성공적으로 추가되었습니다. 페이지를 새로고침합니다.");
+        window.location.reload();
+      }
+      setIsMenuOpen(false);
+    } catch (error) {
+      alert("데이터 가져오기에 실패했습니다.");
+    }
+  };
   return (
     <header className="w-full h-16 shrink-0 flex items-center justify-between px-5 border-b border-gray-200 bg-white">
       <div className="flex items-center gap-2">
@@ -35,22 +86,19 @@ const Header = ({
           </span>
         </button>
 
-        {/* 옵션 구분선 */}
-        <div className="h-8 w-px bg-slate-300 mx-1" />
-
         {/* 토글 스위치 */}
         <div className="flex items-center gap-2 px-2">
           <button
             onClick={onToggleCloseWindows}
             className={cn(
-              "relative w-10 h-5 rounded-full transition-colors duration-300 outline-none flex-shrink-0",
+              "relative w-6 h-3 rounded-full transition-colors duration-300 outline-none flex-shrink-0",
               !closeWindowsAfterSnapshot ? "bg-blue-500" : "bg-slate-300"
             )}
           >
             <span
               className={cn(
-                "absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full transition-transform duration-300 shadow-sm",
-                !closeWindowsAfterSnapshot && "translate-x-5"
+                "absolute top-0.5 left-0.5 bg-white w-2 h-2 rounded-full transition-transform duration-300 shadow-sm",
+                !closeWindowsAfterSnapshot && "translate-x-3"
               )}
             />
           </button>
@@ -62,6 +110,40 @@ const Header = ({
               </b>
             </span>
           </div>
+        </div>
+
+        {/* 옵션 구분선 */}
+        <div className="h-8 w-px bg-slate-300 mx-1" />
+
+        {/* 메뉴 버튼 */}
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="group flex items-center gap-0 px-3 py-2 hover:bg-slate-100 active:scale-95 text-gray-800 rounded-md transition-all duration-200 font-medium overflow-hidden"
+            title="메뉴"
+          >
+            <MoreHorizontal className="size-4" />
+          </button>
+
+          {/* 드롭다운 메뉴 */}
+          {isMenuOpen && (
+            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-slate-200 py-1 z-50">
+              <button
+                onClick={handleExportData}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+              >
+                <Download className="size-4" />
+                데이터 내보내기
+              </button>
+              <button
+                onClick={handleImportData}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+              >
+                <Upload className="size-4" />
+                데이터 가져오기
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
