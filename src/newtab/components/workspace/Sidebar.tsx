@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import { Plus, Folder, Edit2, Trash2 } from "lucide-react";
+import { Plus, Folder, Edit2, Trash2, X } from "lucide-react";
+import logo from "@/assets/logo.png";
+import qrCode from "@/assets/kakaopay.jpg";
+import { cn } from "@/utils/cn";
 import {
   loadWorkspaces,
   createWorkspace,
@@ -7,7 +10,6 @@ import {
   saveWorkspace,
   type Workspace,
 } from "@/store/workspace";
-import { cn } from "@/utils/cn";
 import {
   DndContext,
   closestCenter,
@@ -152,6 +154,7 @@ const Sidebar = ({ onWorkspaceChange }: SidebarProps) => {
     null
   );
   const [editingName, setEditingName] = useState<string>("");
+  const [showSupportModal, setShowSupportModal] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -316,46 +319,102 @@ const Sidebar = ({ onWorkspaceChange }: SidebarProps) => {
   };
 
   return (
-    <div className="w-full h-full bg-slate-50 p-4 flex flex-col gap-2">
-      <h2 className="text-lg font-semibold text-slate-800 mb-2">Workspace</h2>
-      <button
-        onClick={handleCreateWorkspace}
-        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-200 rounded-md transition-colors duration-200"
-      >
-        <Plus className="size-4" />새 워크스페이스
-      </button>
-
-      <div className="border-t border-slate-200"></div>
-
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={workspaces.map((w) => w.id)}
-          strategy={verticalListSortingStrategy}
+    <>
+      <div className="w-full h-full bg-slate-50 p-4 flex flex-col gap-2">
+        <h2 className="text-lg font-semibold text-slate-800 mb-2">Workspace</h2>
+        <button
+          onClick={handleCreateWorkspace}
+          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-200 rounded-md transition-colors duration-200"
         >
-          <div className="space-y-1 flex-1 overflow-y-auto">
-            {workspaces.map((workspace) => (
-              <SortableWorkspaceItem
-                key={workspace.id}
-                workspace={workspace}
-                isActive={activeWorkspaceId === workspace.id}
-                isEditing={editingWorkspaceId === workspace.id}
-                editingName={editingName}
-                onWorkspaceClick={handleWorkspaceClick}
-                onStartEdit={handleStartEdit}
-                onSaveEdit={handleSaveEdit}
-                onCancelEdit={handleCancelEdit}
-                onNameChange={setEditingName}
-                onDelete={handleDeleteWorkspace}
-              />
-            ))}
+          <Plus className="size-4" />새 워크스페이스
+        </button>
+        <div className="border-t border-slate-200"></div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={workspaces.map((w) => w.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-1 flex-1 overflow-y-auto">
+              {workspaces.map((workspace) => (
+                <SortableWorkspaceItem
+                  key={workspace.id}
+                  workspace={workspace}
+                  isActive={activeWorkspaceId === workspace.id}
+                  isEditing={editingWorkspaceId === workspace.id}
+                  editingName={editingName}
+                  onWorkspaceClick={handleWorkspaceClick}
+                  onStartEdit={handleStartEdit}
+                  onSaveEdit={handleSaveEdit}
+                  onCancelEdit={handleCancelEdit}
+                  onNameChange={setEditingName}
+                  onDelete={handleDeleteWorkspace}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+
+        <button
+          onClick={() => setShowSupportModal(true)}
+          className="text-xs text-slate-400 text-right hover:text-slate-600 transition-colors duration-200"
+        >
+          ☕️ 후원하기
+        </button>
+      </div>
+
+      {/* 후원 모달 */}
+      <div
+        className={cn(
+          "absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white flex flex-col z-50 transition-all duration-700 ease-out",
+          showSupportModal
+            ? "opacity-100 translate-x-0 pointer-events-auto"
+            : "opacity-0 -translate-x-full pointer-events-none"
+        )}
+      >
+        {/* 헤더 섹션 */}
+        <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="Snab Logo" className="w-8 h-8 rounded" />
+            <h1 className="text-xl font-semibold text-white drop-shadow-lg">
+              Snab
+            </h1>
           </div>
-        </SortableContext>
-      </DndContext>
-    </div>
+          <button
+            onClick={() => setShowSupportModal(false)}
+            className="text-white/70 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* 후원 섹션 */}
+        <div className="flex-1 text-center flex flex-col items-center justify-center gap-4 p-4">
+          <p className="text-sm leading-relaxed opacity-90">
+            Snab이 도움이 되셨다면
+            <br />
+            커피 한 잔 어떠신지요 ㅎㅎ..
+          </p>
+
+          {/* QR 코드 섹션 */}
+          <div className="mb-6">
+            <div className="flex justify-center mb-3">
+              <img
+                src={qrCode}
+                alt="후원 QR 코드"
+                className="w-full max-w-48 aspect-square object-contain rounded-md"
+              />
+            </div>
+            <p className="text-xs opacity-80 font-medium">
+              QR 코드를 스캔하여 후원하기
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

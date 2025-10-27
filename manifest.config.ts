@@ -15,17 +15,14 @@ export default defineManifest({
     default_popup: "src/popup/index.html",
   },
   // tabs: 탭 정보 읽기, storage: 로컬 저장소 사용, windows: 창 정보 읽기
-  permissions: ["sidePanel", "contentSettings", "tabs", "storage", "windows"],
+  permissions: ["tabs", "storage", "windows"],
   chrome_url_overrides: {
     newtab: "src/newtab/index.html",
   },
-  content_scripts: [
-    {
-      js: ["src/content/main.tsx"],
-      matches: ["https://*/*"],
-    },
-  ],
-  side_panel: {
-    default_path: "src/sidepanel/index.html",
-  },
+  // content_scripts: [
+  //   {
+  //     js: ["src/content/main.tsx"],
+  //     matches: ["https://*/*"],
+  //   },
+  // ],
 });
