@@ -27,11 +27,12 @@ const Header = ({
         {/* 스냅샷 버튼 */}
         <button
           onClick={onSnapshot}
-          className="group relative flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 active:scale-[0.98] text-white rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-medium overflow-hidden"
+          className="group flex items-center gap-0 px-3 py-2 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-md transition-all duration-200 font-medium shadow-sm hover:shadow-md overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-          <Camera className="size-5 relative z-10" />
-          <span className="relative z-10">스냅샷</span>
+          <Camera className="size-4" />
+          <span className="opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap group-hover:ml-2 max-w-0 group-hover:max-w-20 overflow-hidden">
+            스냅샷
+          </span>
         </button>
 
         {/* 옵션 구분선 */}
@@ -54,10 +55,11 @@ const Header = ({
             />
           </button>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-500">윈도우</span>
-            <span className="text-xs text-slate-400">•</span>
             <span className="text-xs text-slate-500">
-              {closeWindowsAfterSnapshot ? "유지" : "닫기"}
+              모든 윈도우 저장 및{" "}
+              <b className="text-blue-500 font-bold">
+                {closeWindowsAfterSnapshot ? "유지" : "닫기"}
+              </b>
             </span>
           </div>
         </div>
