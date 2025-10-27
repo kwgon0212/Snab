@@ -8,6 +8,7 @@ import {
   selectAndImportJSON,
   importDataFromJSON,
 } from "@/utils/dataExport";
+import { version } from "../../../package.json";
 
 interface HeaderProps {
   onSnapshot: () => void;
@@ -70,15 +71,18 @@ const Header = ({
       <div className="flex items-center gap-2">
         {/* 로고 */}
         <img src={logo} alt="Snab" className="size-8 rounded" />
-        <h1 className="text-xl font-bold text-gray-800">Snab</h1>
-        <h2 className="text-sm text-gray-500">Tab Management</h2>
+        <div className="flex items-baseline gap-2">
+          <h1 className="text-xl font-bold text-gray-800">Snab</h1>
+          <h2 className="text-sm text-gray-500">Tab Management</h2>
+          <h4 className="text-xs text-gray-400">v{version}</h4>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
         {/* 스냅샷 버튼 */}
         <button
           onClick={onSnapshot}
-          className="group flex items-center gap-0 px-3 py-2 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-md transition-all duration-200 font-medium shadow-sm hover:shadow-md overflow-hidden"
+          className="group flex items-center gap-0 px-3 py-2 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-full transition-all duration-200 font-medium shadow-sm hover:shadow-md overflow-hidden"
         >
           <Camera className="size-4" />
           <span className="opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap group-hover:ml-2 max-w-0 group-hover:max-w-20 overflow-hidden">
