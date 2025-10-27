@@ -1,4 +1,3 @@
-import React from "react";
 import type { Tab } from "@/store/workspace";
 
 interface TabItemProps {
@@ -9,7 +8,7 @@ interface TabItemProps {
 
 export const TabItem = ({ tab, onTabClick, onDelete }: TabItemProps) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 truncate">
       {tab.favIconUrl ? (
         <img
           src={tab.favIconUrl}
