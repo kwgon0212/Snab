@@ -1,25 +1,23 @@
-import { useEffect, useState } from "react";
-import { loadAllWindows } from "@/utils/windows";
-import Header from "./components/Header";
+import Workspace from "./components/pannel/workspace";
+import Window from "./components/pannel/window";
+import Header from "./components/header";
 import {
   DndContext,
+  DragEndEvent,
+  DragStartEvent,
   DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCenter,
+  pointerWithin,
 } from "@dnd-kit/core";
-import Window from "./components/Window";
-import { Plus } from "lucide-react";
-import Bookmark from "./components/Bookmark";
-import Workspace from "./components/workspace/Workspace";
-import { useDragAndDrop } from "./hooks/useDragAndDrop";
-import { useSnapshot } from "./hooks/useSnapshot";
+import { useSensors, useSensor, PointerSensor } from "@dnd-kit/core";
+import Tab from "./components/ui/Tab";
+import { useState } from "react";
+import useAllWindows from "./hooks/useAllWindows";
+import { useWorkspaceStore } from "./store/workspace";
 
 export default function App() {
-  const [allWindows, setAllWindows] = useState<chrome.windows.Window[]>([]);
-  const [rightPanelWidth, setRightPanelWidth] = useState(400);
-  const [isResizing, setIsResizing] = useState(false);
+  const { allWindows, setAllWindows } = useAllWindows();
+  const { updateWorkspace, activeWorkspace } = useWorkspaceStore();
+  const [draggingTab, setDraggingTab] = useState<chrome.tabs.Tab | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -29,192 +27,344 @@ export default function App() {
     })
   );
 
-  const fetchWindows = async () => {
-    const windows = await loadAllWindows();
-    setAllWindows(windows);
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    if (!active.data.current) return;
+
+    const tabInfo = active.data.current.tabInfo as chrome.tabs.Tab;
+    setDraggingTab(tabInfo);
   };
 
-  // 커스텀 훅 사용
-  const {
-    activeTabId,
-    activeGroupTab,
-    handleDragOver,
-    handleDragEnd,
-    handleDragStart,
-  } = useDragAndDrop({
-    allWindows,
-    fetchWindows,
-    setAllWindows,
-  });
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  const {
-    closeWindowsAfterSnapshot,
-    handleSnapshot,
-    handleToggleCloseWindows,
-  } = useSnapshot({
-    allWindows,
-    fetchWindows,
-  });
+    if (!over || !over.data.current) {
+      setDraggingTab(null);
+      return;
+    }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsResizing(true);
-    e.preventDefault();
+    if (!active.data.current) {
+      setDraggingTab(null);
+      return;
+    }
+
+    const origin = active.data.current.origin;
+    const draggedTab = active.data.current.tabInfo as chrome.tabs.Tab;
+
+    // 같은 그룹 내에서 탭 정렬
+    if (
+      over.data.current.type === "tab" &&
+      origin?.type === "group" &&
+      activeWorkspace
+    ) {
+      handleGroupTabSort(active.id as string, over.id as string, origin.id);
+      setDraggingTab(null);
+      return;
+    }
+
+    // workspace의 group -> group으로 드래그 시 탭 이동
+    if (over.data.current.type === "group" && origin?.type === "group") {
+      handleGroupToGroupMove(
+        draggedTab,
+        origin.id,
+        over.data.current.id,
+        over.data.current.workspaceId || activeWorkspace?.id
+      );
+      setDraggingTab(null);
+      return;
+    }
+
+    // window -> workspace의 group으로 드래그 시 탭 추가
+    if (over.data.current.type === "group" && origin?.type === "window") {
+      handleWindowToGroupMove(
+        draggedTab,
+        over.data.current.id,
+        over.data.current.workspaceId || activeWorkspace?.id
+      );
+      setDraggingTab(null);
+      return;
+    }
+
+    // 같은 윈도우 내에서 탭 정렬
+    if (over.data.current.type === "tab" && origin?.type === "window") {
+      handleWindowTabSort(
+        active.id as string,
+        over.id as string,
+        parseInt(origin.id)
+      );
+      setDraggingTab(null);
+      return;
+    }
+
+    // window -> window로 드래그 시 탭 이동
+    if (over.data.current.type === "window" && origin?.type === "window") {
+      handleWindowToWindowMove(
+        draggedTab,
+        parseInt(origin.id),
+        over.data.current.id as number
+      );
+      setDraggingTab(null);
+      return;
+    }
+
+    // workspace의 group -> window로 드래그 시 탭 추가
+    if (over.data.current.type === "window" && origin?.type === "group") {
+      handleGroupToWindowMove(
+        draggedTab,
+        origin.id,
+        over.data.current.id as number
+      );
+      setDraggingTab(null);
+      return;
+    }
+
+    setDraggingTab(null);
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isResizing) return;
+  // 같은 그룹 내에서 탭 정렬
+  const handleGroupTabSort = (
+    activeTabId: string,
+    overTabId: string,
+    groupId: string
+  ) => {
+    if (!activeWorkspace || activeTabId === overTabId) return;
 
-    const newWidth = window.innerWidth - e.clientX;
-    const minWidth = 300;
-    const maxWidth = 600;
+    const sourceGroup = activeWorkspace.groups.find((g) => g.id === groupId);
+    if (!sourceGroup) return;
 
-    if (newWidth >= minWidth && newWidth <= maxWidth) {
-      setRightPanelWidth(newWidth);
+    // ID 파싱: group-${groupId}-tab-${tabId} 형식에서 tabId 추출
+    const parseTabId = (id: string) => {
+      const match = id.match(/-tab-(.+)$/);
+      return match ? match[1] : null;
+    };
+
+    const activeTabIdParsed = parseTabId(activeTabId);
+    const overTabIdParsed = parseTabId(overTabId);
+
+    if (!activeTabIdParsed || !overTabIdParsed) return;
+
+    const oldIndex = sourceGroup.tabs.findIndex((tab) => {
+      const tabIdStr =
+        typeof tab.id === "number" ? String(tab.id) : String(tab.id || "");
+      return tabIdStr === activeTabIdParsed;
+    });
+    const newIndex = sourceGroup.tabs.findIndex((tab) => {
+      const tabIdStr =
+        typeof tab.id === "number" ? String(tab.id) : String(tab.id || "");
+      return tabIdStr === overTabIdParsed;
+    });
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newTabs = [...sourceGroup.tabs];
+      const [removed] = newTabs.splice(oldIndex, 1);
+      newTabs.splice(newIndex, 0, removed);
+
+      const updatedGroups = activeWorkspace.groups.map((group) =>
+        group.id === groupId ? { ...group, tabs: newTabs } : group
+      );
+
+      updateWorkspace(activeWorkspace.id, { groups: updatedGroups });
     }
   };
 
-  const handleMouseUp = () => {
-    setIsResizing(false);
+  // workspace의 group -> group으로 드래그 시 탭 이동
+  const handleGroupToGroupMove = (
+    draggedTab: chrome.tabs.Tab,
+    sourceGroupId: string,
+    targetGroupId: string,
+    workspaceId?: string
+  ) => {
+    if (!workspaceId || !activeWorkspace || sourceGroupId === targetGroupId)
+      return;
+
+    const updatedGroups = activeWorkspace.groups.map((group) => {
+      if (group.id === sourceGroupId) {
+        return {
+          ...group,
+          tabs: group.tabs.filter((tab) => tab.id !== draggedTab.id),
+        };
+      }
+      if (group.id === targetGroupId) {
+        const tabExists = group.tabs.some((tab) => tab.url === draggedTab.url);
+        if (!tabExists) {
+          return {
+            ...group,
+            tabs: [...group.tabs, draggedTab],
+          };
+        }
+      }
+      return group;
+    });
+
+    updateWorkspace(workspaceId, { groups: updatedGroups });
   };
 
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+  // window -> workspace의 group으로 드래그 시 탭 추가
+  const handleWindowToGroupMove = (
+    draggedTab: chrome.tabs.Tab,
+    groupId: string,
+    workspaceId?: string
+  ) => {
+    if (!workspaceId || !activeWorkspace) return;
+
+    const updatedGroups = activeWorkspace.groups.map((group) => {
+      if (group.id === groupId) {
+        const tabExists = group.tabs.some((tab) => tab.url === draggedTab.url);
+        if (!tabExists) {
+          return {
+            ...group,
+            tabs: [...group.tabs, draggedTab],
+          };
+        }
+      }
+      return group;
+    });
+
+    updateWorkspace(workspaceId, { groups: updatedGroups });
+    chrome.tabs.remove(draggedTab.id!);
+  };
+
+  // 같은 윈도우 내에서 탭 정렬
+  const handleWindowTabSort = (
+    activeTabId: string,
+    overTabId: string,
+    windowId: number
+  ) => {
+    if (activeTabId === overTabId) return;
+
+    // ID 파싱: window-${windowId}-tab-${tabId} 형식에서 tabId 추출
+    const parseTabId = (id: string) => {
+      const match = id.match(/-tab-(.+)$/);
+      return match ? parseInt(match[1]) : null;
+    };
+
+    const activeTabIdNum = parseTabId(activeTabId);
+    const overTabIdNum = parseTabId(overTabId);
+
+    if (!activeTabIdNum || !overTabIdNum) return;
+
+    const sourceWindow = allWindows.find((w) => w.id === windowId);
+    if (!sourceWindow || !sourceWindow.tabs) return;
+
+    const activeTab = sourceWindow.tabs.find(
+      (tab) => tab.id === activeTabIdNum
+    );
+    const overTab = sourceWindow.tabs.find((tab) => tab.id === overTabIdNum);
+
+    if (!activeTab || !overTab || activeTab.windowId !== overTab.windowId)
+      return;
+
+    const oldIndex = sourceWindow.tabs.findIndex(
+      (tab) => tab.id === activeTabIdNum
+    );
+    const newIndex = sourceWindow.tabs.findIndex(
+      (tab) => tab.id === overTabIdNum
+    );
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      chrome.tabs.move(activeTabIdNum, { index: newIndex });
+
+      setAllWindows((prevWindows) =>
+        prevWindows.map((window) => {
+          if (window.id === windowId && window.tabs) {
+            const newTabs = [...window.tabs];
+            const [removed] = newTabs.splice(oldIndex, 1);
+            newTabs.splice(newIndex, 0, removed);
+            return { ...window, tabs: newTabs };
+          }
+          return window;
+        })
+      );
     }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isResizing]);
-
-  const handleCreateWindow = async () => {
-    await chrome.windows.create({});
-    fetchWindows();
   };
 
-  useEffect(() => {
-    fetchWindows();
+  // window -> window로 드래그 시 탭 이동
+  const handleWindowToWindowMove = (
+    draggedTab: chrome.tabs.Tab,
+    sourceWindowId: number,
+    targetWindowId: number
+  ) => {
+    if (!draggedTab.id || sourceWindowId === targetWindowId) return;
 
-    chrome.tabs.onCreated.addListener(fetchWindows);
-    chrome.tabs.onUpdated.addListener(fetchWindows);
-    chrome.tabs.onRemoved.addListener(fetchWindows);
-    chrome.windows.onBoundsChanged.addListener(fetchWindows);
-    chrome.windows.onFocusChanged.addListener(fetchWindows);
+    chrome.tabs.move(draggedTab.id, {
+      windowId: targetWindowId,
+      index: -1,
+    });
 
-    return () => {
-      chrome.tabs.onCreated.removeListener(fetchWindows);
-      chrome.tabs.onUpdated.removeListener(fetchWindows);
-      chrome.tabs.onRemoved.removeListener(fetchWindows);
-      chrome.windows.onBoundsChanged.removeListener(fetchWindows);
-      chrome.windows.onFocusChanged.removeListener(fetchWindows);
-    };
-  }, []);
+    setAllWindows((prevWindows) =>
+      prevWindows.map((window) => {
+        if (window.id === sourceWindowId && window.tabs) {
+          return {
+            ...window,
+            tabs: window.tabs.filter((tab) => tab.id !== draggedTab.id),
+          };
+        }
+        if (window.id === targetWindowId && window.tabs) {
+          return {
+            ...window,
+            tabs: [...window.tabs, draggedTab],
+          };
+        }
+        return window;
+      })
+    );
+  };
+
+  // workspace의 group -> window로 드래그 시 탭 추가
+  const handleGroupToWindowMove = (
+    draggedTab: chrome.tabs.Tab,
+    sourceGroupId: string,
+    targetWindowId: number
+  ) => {
+    if (!activeWorkspace || !draggedTab.url) return;
+
+    chrome.tabs.create({
+      windowId: targetWindowId,
+      url: draggedTab.url,
+      active: false,
+    });
+
+    const updatedGroups = activeWorkspace.groups.map((group) => {
+      if (group.id === sourceGroupId) {
+        return {
+          ...group,
+          tabs: group.tabs.filter((tab) => tab.id !== draggedTab.id),
+        };
+      }
+      return group;
+    });
+
+    updateWorkspace(activeWorkspace.id, { groups: updatedGroups });
+  };
 
   return (
-    <div className="w-screen h-screen min-w-[1000px] flex flex-col overflow-hidden">
-      <Header
-        onSnapshot={handleSnapshot}
-        closeWindowsAfterSnapshot={closeWindowsAfterSnapshot}
-        onToggleCloseWindows={handleToggleCloseWindows}
-      />
-
+    <div className="w-screen h-screen flex flex-col">
+      <Header />
       <DndContext
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
+        // onDragOver={handleDragOver}
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={pointerWithin}
       >
-        <main className="flex w-full flex-1 min-h-0">
-          <section className="flex-1 h-full min-w-0 flex flex-col">
-            <Bookmark />
-            <Workspace />
-          </section>
+        <main className="w-full flex h-[calc(100vh-4rem)] overflow-hidden">
+          <Workspace />
+          <Window allWindows={allWindows} />
 
-          <div
-            className="w-[1px] bg-slate-300 hover:bg-blue-400 cursor-col-resize transition-all duration-300 z-30 relative"
-            onMouseDown={handleMouseDown}
-          />
-
-          <section
-            className="relative z-20 shrink-0 h-full flex flex-col gap-3 overflow-hidden p-5 bg-white"
-            style={{ width: `${rightPanelWidth}px` }}
-          >
-            <span className="text-slate-500">
-              총 {allWindows.length}개의 윈도우
-            </span>
-            <div className="flex-1 overflow-y-auto flex flex-col gap-4 pb-5">
-              {allWindows.map((window, idx) => (
-                <Window key={window.id} window={window} index={idx} />
-              ))}
-            </div>
-            <div className="shrink-0">
-              <button
-                onClick={handleCreateWindow}
-                className="flex w-full justify-center items-center gap-2 bg-blue-500 hover:bg-blue-600 active:scale-95 px-4 py-2 transition-all duration-200 rounded-md text-white shadow-sm hover:shadow-md"
-              >
-                <Plus className="size-4" />
-                <span>새 윈도우</span>
-              </button>
-            </div>
-          </section>
+          <DragOverlay zIndex={20}>
+            {draggingTab && (
+              <Tab
+                id={draggingTab.id!}
+                origin={{
+                  type: "window",
+                  id: draggingTab.windowId!.toString(),
+                }}
+                onClick={() => {}}
+                tabInfo={draggingTab}
+              />
+            )}
+          </DragOverlay>
         </main>
-
-        <DragOverlay>
-          {activeGroupTab ? (
-            <div className="flex items-center gap-2 bg-white p-2 rounded-md hover:bg-slate-50 shadow-lg opacity-90 min-w-[200px]">
-              {activeGroupTab.favIconUrl ? (
-                <img
-                  src={activeGroupTab.favIconUrl}
-                  alt=""
-                  className="size-4 rounded-sm flex-shrink-0"
-                  style={{
-                    filter:
-                      "drop-shadow(0 0 0.1px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.35))",
-                  }}
-                />
-              ) : (
-                <div className="size-4 rounded-sm bg-slate-200 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs">🌐</span>
-                </div>
-              )}
-              <span className="text-sm truncate">{activeGroupTab.title}</span>
-            </div>
-          ) : activeTabId ? (
-            <div className="flex items-center gap-2 w-full bg-white p-2 rounded-md shadow-lg opacity-90">
-              {allWindows
-                .flatMap((w) => w.tabs || [])
-                .find((t) => t.id === activeTabId)?.favIconUrl ? (
-                <img
-                  src={
-                    allWindows
-                      .flatMap((w) => w.tabs || [])
-                      .find((t) => t.id === activeTabId)?.favIconUrl
-                  }
-                  alt=""
-                  className="size-4 rounded-sm"
-                  style={{
-                    filter:
-                      "drop-shadow(0 0 0.1px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.35))",
-                  }}
-                />
-              ) : (
-                <div className="size-4 rounded-sm flex items-center justify-center">
-                  <span className="text-sm">🌐</span>
-                </div>
-              )}
-              <span className="text-sm truncate">
-                {
-                  allWindows
-                    .flatMap((w) => w.tabs || [])
-                    .find((t) => t.id === activeTabId)?.title
-                }
-              </span>
-            </div>
-          ) : null}
-        </DragOverlay>
       </DndContext>
     </div>
   );

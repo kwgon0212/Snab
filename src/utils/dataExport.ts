@@ -1,7 +1,10 @@
+import type { Workspace } from "@/newtab/types/workspace";
+import pkg from "../../package.json";
+
 interface ExportData {
-  workspaces: any[];
-  bookmarks: any[];
-  snapshotCloseWindows: boolean;
+  workspaces: Workspace[];
+  // bookmarks: any[];
+  // snapshotCloseWindows: boolean;
   exportDate: string;
   version: string;
 }
@@ -11,16 +14,16 @@ export const exportAllData = async (): Promise<string> => {
   try {
     const result = await chrome.storage.local.get([
       "workspaces",
-      "bookmarks",
-      "snapshotCloseWindows",
+      // "bookmarks",
+      // "snapshotCloseWindows",
     ]);
 
     const exportData: ExportData = {
       workspaces: result.workspaces || [],
-      bookmarks: result.bookmarks || [],
-      snapshotCloseWindows: result.snapshotCloseWindows || false,
+      // bookmarks: result.bookmarks || [],
+      // snapshotCloseWindows: result.snapshotCloseWindows || false,
       exportDate: new Date().toISOString(),
-      version: "1.0",
+      version: pkg.version,
     };
 
     return JSON.stringify(exportData, null, 2);
@@ -31,15 +34,16 @@ export const exportAllData = async (): Promise<string> => {
 };
 
 // JSON 파일을 다운로드
-export const downloadDataAsJSON = async () => {
+export const downloadDataAsJSON = async (): Promise<void> => {
   try {
     const jsonData = await exportAllData();
     const blob = new Blob([jsonData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
+    const dateStr = new Date().toISOString().split("T")[0].replace(/-/g, "");
     const a = document.createElement("a");
     a.href = url;
-    a.download = `snab-backup-${new Date().toISOString().split("T")[0]}.json`;
+    a.download = `snab-backup-${dateStr}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -61,41 +65,55 @@ export const importDataFromJSON = async (jsonFile: File): Promise<boolean> => {
       throw new Error("유효하지 않은 백업 파일입니다.");
     }
 
+    // Workspace 데이터 구조 검증
+    if (importData.workspaces) {
+      for (const workspace of importData.workspaces) {
+        if (
+          !workspace.id ||
+          !workspace.name ||
+          !Array.isArray(workspace.groups)
+        ) {
+          throw new Error("워크스페이스 데이터 형식이 올바르지 않습니다.");
+        }
+      }
+    }
+
     // 기존 데이터 가져오기
     const currentData = await chrome.storage.local.get([
       "workspaces",
-      "bookmarks",
+      // "bookmarks",
       "snapshotCloseWindows",
     ]);
 
     const currentWorkspaces = currentData.workspaces || [];
-    const currentBookmarks = currentData.bookmarks || [];
+    // const currentBookmarks = currentData.bookmarks || [];
 
     // 워크스페이스 ID 충돌 방지를 위해 새로운 ID 생성
+    const timestamp = Date.now();
     const importedWorkspaces = (importData.workspaces || []).map(
-      (workspace: any) => ({
+      (workspace: Workspace, index: number) => ({
         ...workspace,
-        id: `imported-${Date.now()}-${workspace.id}`,
-        name: `${workspace.name} (가져온 데이터)`,
-        groups: workspace.groups.map((group: any) => ({
+        id: `imported-${timestamp}-${index}-${workspace.id}`,
+        name: `${workspace.name} (업로드)`,
+        groups: workspace.groups.map((group, groupIndex) => ({
           ...group,
-          id: `imported-${Date.now()}-${group.id}`,
+          id: `imported-${timestamp}-${index}-${groupIndex}-${group.id}`,
         })),
       })
     );
 
     // 북마크 중복 제거 (URL 기준)
-    const existingUrls = new Set(
-      currentBookmarks.map((bookmark: any) => bookmark.url)
-    );
-    const newBookmarks = (importData.bookmarks || []).filter(
-      (bookmark: any) => !existingUrls.has(bookmark.url)
-    );
+    // const existingUrls = new Set(
+    //   currentBookmarks.map((bookmark: any) => bookmark?.url).filter(Boolean)
+    // );
+    // const newBookmarks = (importData.bookmarks || []).filter(
+    //   (bookmark: any) => bookmark?.url && !existingUrls.has(bookmark.url)
+    // );
 
     // 데이터 병합
     await chrome.storage.local.set({
       workspaces: [...currentWorkspaces, ...importedWorkspaces],
-      bookmarks: [...currentBookmarks, ...newBookmarks],
+      // bookmarks: [...currentBookmarks, ...newBookmarks],
       // 스냅샷 옵션은 기존 설정 유지
     });
 

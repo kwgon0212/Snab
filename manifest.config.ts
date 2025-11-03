@@ -17,6 +17,7 @@ export default defineManifest({
   // tabs: 탭 정보 읽기, storage: 로컬 저장소 사용, windows: 창 정보 읽기
   permissions: ["tabs", "storage", "windows"],
   chrome_url_overrides: {
+    // newtab: "src/newtab/index.html",
     newtab: "src/newtab/index.html",
   },
   // content_scripts: [
