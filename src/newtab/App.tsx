@@ -16,7 +16,8 @@ import { useWorkspaceStore } from "./store/workspace";
 
 export default function App() {
   const { allWindows, setAllWindows } = useAllWindows();
-  const { updateWorkspace, activeWorkspace } = useWorkspaceStore();
+  const { updateWorkspace, activeWorkspace, loadWorkspaces } =
+    useWorkspaceStore();
   const [draggingTab, setDraggingTab] = useState<chrome.tabs.Tab | null>(null);
 
   useEffect(() => {
@@ -71,6 +72,10 @@ export default function App() {
       "color:#9CA3AF; font-size:12px; font-style:italic;",
       "color:#F472B6; font-size:15px; font-style:italic;"
     );
+  }, []);
+
+  useEffect(() => {
+    loadWorkspaces();
   }, []);
 
   const sensors = useSensors(

@@ -14,16 +14,8 @@ export default defineManifest({
     },
     default_popup: "src/popup/index.html",
   },
-  // tabs: 탭 정보 읽기, storage: 로컬 저장소 사용, windows: 창 정보 읽기
-  permissions: ["tabs", "storage", "windows"],
+  permissions: ["tabs", "storage"],
   chrome_url_overrides: {
-    // newtab: "src/newtab/index.html",
     newtab: "src/newtab/index.html",
   },
-  // content_scripts: [
-  //   {
-  //     js: ["src/content/main.tsx"],
-  //     matches: ["https://*/*"],
-  //   },
-  // ],
 });

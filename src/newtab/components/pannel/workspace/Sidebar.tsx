@@ -105,15 +105,16 @@ const Sidebar = ({ width }: SidebarProps) => {
           <div
             key={workspace.id}
             className={cn(
-              "w-full flex justify-between items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-200 rounded-md transition-colors duration-200 group cursor-pointer",
-              activeWorkspace?.id === workspace.id && "bg-slate-200"
+              "w-full flex justify-between items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-200 rounded-md transition-colors duration-200 group cursor-pointer"
             )}
             onClick={() => setActiveWorkspace(workspace)}
           >
             <h3
               className={cn(
                 "text-sm font-medium text-slate-800 truncate",
-                activeWorkspace?.id === workspace.id && "text-blue-500"
+                activeWorkspace?.id === workspace.id
+                  ? "text-blue-500 font-bold"
+                  : "text-slate-500 font-medium"
               )}
             >
               {workspace.name}
