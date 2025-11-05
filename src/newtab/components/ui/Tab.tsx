@@ -52,22 +52,20 @@ const Tab = ({ id, onClick, tabInfo, origin, className }: TabProps) => {
         return;
       }
 
-      // 탭 ID 파싱 (group-${groupId}-tab-${tabId} 형식에서 실제 tabId 추출)
-      const actualTabId =
-        typeof id === "string" ? parseInt(id.split("-tab-")[1] || "0") : id;
+      // URL을 기준으로 탭을 찾아서 제거 (그룹에 저장된 탭은 스냅샷일 수 있어 URL 기반이 더 안정적)
+      const tabUrl = tabInfo.url;
+
+      if (!tabUrl) {
+        console.warn("탭 URL이 없습니다.");
+        return;
+      }
 
       updateWorkspace(workspaceId, {
         groups: activeWorkspace.groups.map((group) =>
           group.id === groupId
             ? {
                 ...group,
-                tabs: group.tabs.filter((tab) => {
-                  const tabIdNum =
-                    typeof tab.id === "number"
-                      ? tab.id
-                      : parseInt(String(tab.id).split("-tab-")[1] || "0");
-                  return tabIdNum !== actualTabId;
-                }),
+                tabs: group.tabs.filter((tab) => tab.url !== tabUrl),
               }
             : group
         ),
