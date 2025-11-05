@@ -10,7 +10,7 @@ import {
 } from "@dnd-kit/core";
 import { useSensors, useSensor, PointerSensor } from "@dnd-kit/core";
 import Tab from "./components/ui/Tab";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useAllWindows from "./hooks/useAllWindows";
 import { useWorkspaceStore } from "./store/workspace";
 
@@ -18,6 +18,60 @@ export default function App() {
   const { allWindows, setAllWindows } = useAllWindows();
   const { updateWorkspace, activeWorkspace } = useWorkspaceStore();
   const [draggingTab, setDraggingTab] = useState<chrome.tabs.Tab | null>(null);
+
+  useEffect(() => {
+    console.log(
+      `                    
+                      .##=                                            
+                       *###                                           
+                       *###.                                          
+                      .####.                 =+=                      
+                      =####              .+####=                      
+                     +####.            =#####+.                       
+                    *####=         .*#####*                           
+                  .*####:        -######*.                            
+                 =#####*      =######=                                
+                *#*###############. .+*###-                           
+               *###############: .*#######-                           
+             .+#############*:.:######****                            
+             .#############-.+#####=...::::                           
+             #############.:####= .=*######*                          
+             ############*.:##: -##########*.                         
+             #############*- .:######*:. -#.                          
+             ###############+: +** .. ####-                           
+             ################**::=***#:+*.                            
+            ##########################*=                              
+          :##########################:                                
+         +########################-..                                 
+          :*##################*.                                      
+            *#############.                                           
+             .=##########-                                            
+                :+######:                                              
+      `
+    );
+    console.log(
+      "%c███████╗███╗   ██╗ █████╗ ██████╗ \n" +
+        "██╔════╝████╗  ██║██╔══██╗██╔══██╗\n" +
+        "███████╗██╔██╗ ██║███████║██████╔╝\n" +
+        "╚════██║██║╚██╗██║██╔══██║██╔══██╗\n" +
+        "███████║██║ ╚████║██║  ██║███████║\n" +
+        "╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝",
+      "background: linear-gradient(90deg, #60A5FA, #A78BFA, #F472B6);" +
+        "color: transparent;" +
+        "-webkit-background-clip: text;" +
+        "font-family: monospace;" +
+        "font-weight: 700;" +
+        "font-size: 14px;" +
+        "line-height: 1.1;"
+    );
+
+    console.log(
+      "%c✨ Snab을 이용해주셔서 감사합니다! 👀\n%c수정사항이나 버그 발생 시 메일로 알려주세요 :) 📧 \n\n%c>>>>>> kwgon0102@gmail.com <<<<<<",
+      "color:#A78BFA; font-weight:bold; font-size:14px;",
+      "color:#9CA3AF; font-size:12px; font-style:italic;",
+      "color:#F472B6; font-size:15px; font-style:italic;"
+    );
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

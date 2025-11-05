@@ -25,7 +25,6 @@ export const loadAllWindows = async () => {
 
 export const loadCurrentWindow = async () => {
   const tabs = await chrome.tabs.query({ currentWindow: true });
-  console.log(tabs);
   return tabs;
 };
 

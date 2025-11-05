@@ -1,4 +1,3 @@
-// src/types/collection.ts
 export type NodeBase = {
   id: string;
   name: string;
