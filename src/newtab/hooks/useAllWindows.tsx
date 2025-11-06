@@ -14,9 +14,9 @@ export default function useAllWindows() {
 
     // onUpdated 리스너 함수 정의 (제거를 위해 참조 저장 필요)
     const handleTabUpdated = (
-      tabId: number,
+      _tabId: number,
       changeInfo: chrome.tabs.OnUpdatedInfo,
-      tab: chrome.tabs.Tab
+      _tab: chrome.tabs.Tab
     ) => {
       // 탭이 완전히 로드되었을 때만 업데이트 (파비콘 포함)
       if (changeInfo.status === "complete") {
