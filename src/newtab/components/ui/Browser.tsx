@@ -110,7 +110,7 @@ const BrowserUI = ({
         {/* 아코디언 컨텐츠 */}
         <div
           className={cn(
-            "w-full p-2 flex flex-col gap-2 overflow-hidden transition-all duration-250 ease-in-out bg-slate-100 rounded-b-md",
+            "w-full p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-250 ease-in-out bg-slate-100 rounded-b-md",
             isExpanded ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0 p-0"
           )}
         >
@@ -120,7 +120,10 @@ const BrowserUI = ({
                 <Tab
                   key={tab.id!}
                   id={`window-${window.id}-tab-${tab.id}`}
-                  onClick={() => {}}
+                  onClick={() => {
+                    chrome.windows.update(window.id!, { focused: true });
+                    chrome.tabs.update(tab.id!, { active: true });
+                  }}
                   tabInfo={tab}
                   origin={{ type: "window", id: window.id!.toString() }}
                 />

@@ -208,7 +208,9 @@ const GroupCard = ({
               <Tab
                 key={`group-${group.id}-tab-${tabId}`}
                 id={`group-${group.id}-tab-${tabId}`}
-                onClick={() => {}}
+                onClick={() => {
+                  chrome.tabs.create({ url: tab.url, active: false });
+                }}
                 tabInfo={tab}
                 origin={{ type: "group", id: group.id.toString() }}
                 className="w-full"
