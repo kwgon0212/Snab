@@ -133,12 +133,14 @@ const Sidebar = ({ width }: SidebarProps) => {
         ))}
       </div>
 
-      <button
-        onClick={() => setShowDonationModal(true)}
-        className="text-xs text-slate-400 text-right hover:text-slate-600 transition-colors duration-200"
-      >
-        ☕️ 후원하기
-      </button>
+      <div className="flex justify-end">
+        <button
+          onClick={() => setShowDonationModal(true)}
+          className="intro-donation-button w-fit text-xs text-slate-400 hover:text-slate-600 transition-colors duration-200"
+        >
+          ☕️ 후원하기
+        </button>
+      </div>
     </aside>
   );
 };

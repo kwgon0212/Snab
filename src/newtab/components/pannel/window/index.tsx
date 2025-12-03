@@ -41,7 +41,7 @@ const Window = ({ allWindows }: { allWindows: chrome.windows.Window[] }) => {
     <>
       <ResizeHandle
         onResize={setSectionWidth}
-        strokeWidth={2}
+        strokeWidth={1}
         minWidth={280}
         maxWidth={400}
         direction="horizontal"
@@ -57,9 +57,9 @@ const Window = ({ allWindows }: { allWindows: chrome.windows.Window[] }) => {
           총 {allWindows.length}개의 윈도우
         </h3>
         <div className="flex items-center gap-2">
-          <div className="h-1 w-4 bg-blue-400" />
+          <div className="h-1 w-4 rounded-full bg-blue-400" />
           <span className="text-slate-500">현재 윈도우</span>
-          <div className="h-1 w-4 bg-slate-300" />
+          <div className="h-1 w-4 rounded-full bg-slate-300" />
           <span className="text-slate-500">나머지 윈도우</span>
         </div>
 

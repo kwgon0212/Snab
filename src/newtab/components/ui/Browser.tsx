@@ -57,8 +57,8 @@ const BrowserUI = ({
         className={cn(
           "rounded-lg relative",
           window.focused
-            ? "border-blue-400 border-2"
-            : "border-slate-300 border-2",
+            ? "border-blue-400 border-1"
+            : "border-slate-300 border-1",
           shouldShowOverlay && "bg-blue-50 border-blue-500 border-dashed z-[5]"
         )}
       >
@@ -79,13 +79,13 @@ const BrowserUI = ({
         <div
           onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
-            "w-full flex items-center justify-between p-3 rounded-t-lg hover:bg-gray-50 transition-colors cursor-pointer bg-white",
+            "w-full flex items-center justify-between px-3 py-2 rounded-t-lg hover:bg-gray-50 transition-colors cursor-pointer bg-white",
             isExpanded ? "rounded-b-none" : "rounded-b-lg"
           )}
         >
           <div className="w-full min-w-0 flex justify-between items-center cursor-pointer">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="intro-browser-header-buttons flex items-center gap-2">
                 <CloseButton windowId={window.id!} />
                 <MinimizeButton windowId={window.id!} />
                 <FullscreenToggleButton
@@ -100,7 +100,7 @@ const BrowserUI = ({
 
             <ChevronDown
               className={cn(
-                "transition-transform duration-300 cursor-pointer text-slate-400",
+                "transition-transform duration-300 cursor-pointer text-slate-400 size-5",
                 isExpanded ? "rotate-180" : ""
               )}
             />
@@ -125,6 +125,7 @@ const BrowserUI = ({
                     chrome.tabs.update(tab.id!, { active: true });
                   }}
                   tabInfo={tab}
+                  className="intro-browser-tab"
                   origin={{ type: "window", id: window.id!.toString() }}
                 />
               ))}
@@ -151,7 +152,7 @@ const CloseButton = ({ windowId }: { windowId: number }) => {
   return (
     <button
       onClick={handleClose}
-      className="size-3.5 rounded-full bg-red-400 hover:bg-red-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
+      className="size-3 rounded-full bg-red-400 hover:bg-red-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
     >
       <X className="size-2 text-red-800 opacity-0 group-hover:opacity-100 transition-all duration-300" />
     </button>
@@ -167,7 +168,7 @@ const MinimizeButton = ({ windowId }: { windowId: number }) => {
   return (
     <button
       onClick={handleMinimize}
-      className="size-3.5 rounded-full bg-yellow-400 hover:bg-yellow-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
+      className="size-3 rounded-full bg-yellow-400 hover:bg-yellow-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
     >
       <Minimize className="size-2 text-yellow-800 opacity-0 group-hover:opacity-100 transition-all duration-300" />
     </button>
@@ -199,7 +200,7 @@ const FullscreenToggleButton = ({
   return (
     <button
       onClick={handleToggleFullscreen}
-      className="size-3.5 rounded-full bg-green-400 hover:bg-green-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
+      className="size-3 rounded-full bg-green-400 hover:bg-green-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
       aria-label={isFullscreen ? "전체화면 해제" : "전체화면"}
       title={isFullscreen ? "전체화면 해제" : "전체화면"}
     >

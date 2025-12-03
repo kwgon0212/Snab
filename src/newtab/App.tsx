@@ -13,6 +13,7 @@ import Tab from "./components/ui/Tab";
 import { useEffect, useState } from "react";
 import useAllWindows from "./hooks/useAllWindows";
 import { useWorkspaceStore } from "./store/workspace";
+import Intro from "./components/Intro";
 
 export default function App() {
   const { allWindows, setAllWindows } = useAllWindows();
@@ -395,6 +396,8 @@ export default function App() {
 
     updateWorkspace(activeWorkspace.id, { groups: updatedGroups });
   };
+
+  Intro();
 
   return (
     <div className="w-screen h-screen flex flex-col">

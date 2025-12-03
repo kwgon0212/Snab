@@ -44,7 +44,7 @@ const Header = () => {
             closeWindowsAfterSnapshot={closeWindowsAfterSnapshot}
           />
 
-          <div className="flex items-center gap-2">
+          <div className="intro-snapshot-option flex items-center gap-2">
             <span className="text-xs text-gray-600 whitespace-nowrap">
               스냅샷 후 모든 윈도우
             </span>
@@ -53,7 +53,7 @@ const Header = () => {
                 checked={closeWindowsAfterSnapshot}
                 onChange={handleToggle}
               />
-              <span className="text-xs text-gray-500 min-w-[32px]">
+              <span className="text-xs text-gray-500">
                 {closeWindowsAfterSnapshot ? "유지" : "닫기"}
               </span>
             </div>

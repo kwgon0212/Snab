@@ -84,7 +84,7 @@ const SnapshotButton = ({
   return (
     <button
       onClick={handleSnapshot}
-      className="group flex items-center gap-0 px-3 py-2 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-full transition-all duration-200 font-medium shadow-sm hover:shadow-md overflow-hidden"
+      className="intro-snapshot-button group flex items-center gap-0 px-3 py-2 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-full transition-all duration-200 font-medium shadow-sm hover:shadow-md overflow-hidden"
     >
       <Camera className="size-4" />
       <span className="opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap group-hover:ml-2 max-w-0 group-hover:max-w-20 overflow-hidden">

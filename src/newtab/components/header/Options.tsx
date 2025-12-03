@@ -3,6 +3,7 @@ import {
   MoreHorizontal,
   HardDriveDownload,
   HardDriveUpload,
+  HelpCircle,
 } from "lucide-react";
 import useOutsideClick from "@/newtab/hooks/useOutsideClick";
 import {
@@ -53,8 +54,10 @@ const Options = () => {
     }
   };
 
+  const handleIntro = () => {};
+
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative intro-options-menu" ref={menuRef}>
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className="group flex items-center gap-0 px-3 py-2 hover:bg-slate-100 active:scale-95 text-gray-800 rounded-md transition-all duration-200 font-medium overflow-hidden"
@@ -65,20 +68,27 @@ const Options = () => {
 
       {/* 드롭다운 메뉴 */}
       {isMenuOpen && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-slate-200 py-1 z-50">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-slate-200 z-50">
           <button
             onClick={handleExportData}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
           >
             <HardDriveDownload className="size-4" />
             JSON 다운로드
           </button>
           <button
             onClick={handleImportData}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
           >
             <HardDriveUpload className="size-4" />
             JSON 업로드
+          </button>
+          <button
+            onClick={handleIntro}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+          >
+            <HelpCircle className="size-4" />
+            튜토리얼 보기
           </button>
         </div>
       )}
