@@ -5,6 +5,7 @@ import type { WorkspaceGroup } from "@/newtab/types/workspace";
 import Divider from "../../ui/Divider";
 import { useState } from "react";
 import EditBlurInput from "../../ui/EditBlurInput";
+import Tooltip from "../../ui/Tooltip";
 
 const Content = () => {
   const { activeWorkspace, deleteWorkspace, updateWorkspace } =
@@ -84,20 +85,22 @@ const Content = () => {
             className="text-lg"
           />
           <div className="flex items-center gap-1">
-            <button
-              onClick={clickEditWorkspaceName}
-              className="p-1 text-slate-400 hover:text-slate-600 hover:scale-110 rounded-lg transition-all duration-200"
-              title="그룹명 수정"
-            >
-              <Edit2 className="size-3" />
-            </button>
-            <button
-              onClick={() => deleteWorkspace(activeWorkspace.id)}
-              className="p-1 text-slate-400 hover:text-red-500 hover:scale-110 rounded-lg transition-all duration-200"
-              title="워크스페이스 삭제"
-            >
-              <Trash2 className="size-3" />
-            </button>
+            <Tooltip title="그룹명 수정" position="bottom">
+              <button
+                onClick={clickEditWorkspaceName}
+                className="p-1 text-slate-400 hover:text-slate-600 hover:scale-110 rounded-lg transition-all duration-200"
+              >
+                <Edit2 className="size-3" />
+              </button>
+            </Tooltip>
+            <Tooltip title="워크스페이스 삭제" position="bottom">
+              <button
+                onClick={() => deleteWorkspace(activeWorkspace.id)}
+                className="p-1 text-slate-400 hover:text-red-500 hover:scale-110 rounded-lg transition-all duration-200"
+              >
+                <Trash2 className="size-3" />
+              </button>
+            </Tooltip>
           </div>
         </div>
         <button
