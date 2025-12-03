@@ -14,6 +14,7 @@ import type { WorkspaceGroup } from "@/newtab/types/workspace";
 import EditBlurInput from "../../ui/EditBlurInput";
 import { useState } from "react";
 import { cn } from "@/utils/cn";
+import Tooltip from "../../ui/Tooltip";
 
 const GroupCard = ({
   group,
@@ -103,7 +104,7 @@ const GroupCard = ({
   };
 
   const handleDeleteGroup = () => {
-    const result = confirm("정말 삭제하시겠습니까?");
+    const result = confirm(`[${group.name}] 그룹을 삭제하시겠습니까?`);
     if (!result) return;
     updateWorkspace(activeWorkspace?.id || "", {
       groups: activeWorkspace?.groups.filter((g) => g.id !== group.id) || [],
@@ -149,27 +150,30 @@ const GroupCard = ({
         />
 
         <div className="flex items-center gap-1 flex-shrink-0">
-          <button
-            onClick={clickEditGroupName}
-            className="p-1 text-slate-400 hover:text-slate-600 hover:scale-110 rounded-lg transition-all duration-200"
-            title="그룹명 수정"
-          >
-            <Edit2 className="size-3" />
-          </button>
-          <button
-            onClick={handleOpenGroup}
-            className="p-1 text-slate-400 hover:text-blue-500 hover:scale-110 rounded-lg transition-all duration-200"
-            title="새 윈도우에서 모두 열기"
-          >
-            <ExternalLink className="size-3" />
-          </button>
-          <button
-            onClick={handleDeleteGroup}
-            className="p-1 text-slate-400 hover:text-red-500 hover:scale-110 rounded-lg transition-all duration-200"
-            title="그룹 삭제"
-          >
-            <Trash2 className="size-3" />
-          </button>
+          <Tooltip title="그룹명 수정" position="bottom">
+            <button
+              onClick={clickEditGroupName}
+              className="p-1 text-slate-400 hover:text-slate-600 hover:scale-110 rounded-lg transition-all duration-200"
+            >
+              <Edit2 className="size-3" />
+            </button>
+          </Tooltip>
+          <Tooltip title="새 윈도우에서 열기" position="bottom">
+            <button
+              onClick={handleOpenGroup}
+              className="p-1 text-slate-400 hover:text-blue-500 hover:scale-110 rounded-lg transition-all duration-200"
+            >
+              <ExternalLink className="size-3" />
+            </button>
+          </Tooltip>
+          <Tooltip title="그룹 삭제" position="bottom">
+            <button
+              onClick={handleDeleteGroup}
+              className="p-1 text-slate-400 hover:text-red-500 hover:scale-110 rounded-lg transition-all duration-200"
+            >
+              <Trash2 className="size-3" />
+            </button>
+          </Tooltip>
         </div>
       </div>
 

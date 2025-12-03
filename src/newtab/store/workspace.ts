@@ -59,7 +59,12 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       return;
     }
 
-    const result = confirm("정말 삭제하시겠습니까?");
+    const workspaceName = workspaces.find(
+      (workspace) => workspace.id === id
+    )?.name;
+    const result = confirm(
+      `[${workspaceName}] 워크스페이스를 삭제하시겠습니까?`
+    );
     if (!result) return;
 
     const newWorkspaces = workspaces.filter((workspace) => workspace.id !== id);
