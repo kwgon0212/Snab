@@ -13,7 +13,7 @@ import Tab from "./components/ui/Tab";
 import { useEffect, useState } from "react";
 import useAllWindows from "./hooks/useAllWindows";
 import { useWorkspaceStore } from "./store/workspace";
-import Intro from "./components/Intro";
+import { startIntro } from "./components/Intro";
 
 export default function App() {
   const { allWindows, setAllWindows } = useAllWindows();
@@ -77,6 +77,33 @@ export default function App() {
 
   useEffect(() => {
     loadWorkspaces();
+  }, []);
+
+  // 튜토리얼 완료 여부 확인 및 초기 튜토리얼 실행
+  useEffect(() => {
+    const checkAndShowTutorial = async () => {
+      try {
+        const result = await chrome.storage.local.get("tutorialCompleted");
+
+        // 키가 없으면 초기값 false로 생성
+        if (result.tutorialCompleted === undefined) {
+          await chrome.storage.local.set({ tutorialCompleted: false });
+        }
+
+        const tutorialCompleted = result.tutorialCompleted || false;
+
+        // 튜토리얼을 아직 보지 않았다면 실행
+        if (!tutorialCompleted) {
+          startIntro();
+        }
+      } catch (error) {
+        console.error("튜토리얼 상태 확인 실패:", error);
+        // 에러 발생 시에도 튜토리얼 실행
+        startIntro();
+      }
+    };
+
+    checkAndShowTutorial();
   }, []);
 
   const sensors = useSensors(
@@ -396,8 +423,6 @@ export default function App() {
 
     updateWorkspace(activeWorkspace.id, { groups: updatedGroups });
   };
-
-  Intro();
 
   return (
     <div className="w-screen h-screen flex flex-col">

@@ -12,6 +12,7 @@ import {
   importDataFromJSON,
 } from "@/utils/dataExport";
 import { useWorkspaceStore } from "@/newtab/store/workspace";
+import { startIntro } from "../Intro";
 
 const Options = () => {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -54,7 +55,18 @@ const Options = () => {
     }
   };
 
-  const handleIntro = () => {};
+  const handleIntro = async () => {
+    try {
+      // 튜토리얼 완료 상태를 초기화하고 다시 보기
+      await chrome.storage.local.set({ tutorialCompleted: false });
+      startIntro();
+      setIsMenuOpen(false);
+    } catch (error) {
+      console.error("튜토리얼 실행 실패:", error);
+      startIntro();
+      setIsMenuOpen(false);
+    }
+  };
 
   return (
     <div className="relative intro-options-menu" ref={menuRef}>

@@ -1,5 +1,5 @@
 import { driver, DriveStep } from "driver.js";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import "driver.js/dist/driver.css";
 
 const steps: DriveStep[] = [
@@ -63,29 +63,43 @@ const steps: DriveStep[] = [
   },
 ];
 
-const Intro = () => {
-  useEffect(() => {
-    const driverObj = driver({
-      showProgress: true,
-      showButtons: ["next", "previous", "close"],
-      nextBtnText: "다음",
-      prevBtnText: "이전",
-      doneBtnText: "완료",
-      steps,
-      allowClose: true,
-      onDestroyStarted: () => {
-        if (
-          !driverObj.hasNextStep() ||
-          confirm("튜토리얼을 종료하시겠습니까?")
-        ) {
+// 튜토리얼 실행 함수
+export const startIntro = () => {
+  const driverObj = driver({
+    showProgress: true,
+    showButtons: ["next", "previous", "close"],
+    nextBtnText: "다음",
+    prevBtnText: "이전",
+    doneBtnText: "완료",
+    steps,
+    allowClose: true,
+    onDestroyStarted: () => {
+      const isLastStep = !driverObj.hasNextStep();
+
+      if (isLastStep) {
+        // 마지막 단계에서 종료하는 경우 (완료)
+        chrome.storage.local.set({ tutorialCompleted: true });
+        driverObj.destroy();
+      } else {
+        // 중간에 종료하려는 경우 confirm 확인
+        if (confirm("튜토리얼을 종료하시겠습니까?")) {
+          // 사용자가 확인을 누른 경우도 완료로 처리
+          chrome.storage.local.set({ tutorialCompleted: true });
           driverObj.destroy();
         }
-      },
-    });
-    driverObj.drive();
+        // 취소를 누른 경우 destroy하지 않음
+      }
+    },
+  });
+  driverObj.drive();
+};
 
-    return () => driverObj.destroy();
+const Intro = () => {
+  useEffect(() => {
+    startIntro();
   }, []);
+
+  return null;
 };
 
 export default Intro;

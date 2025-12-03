@@ -7,8 +7,8 @@ import {
   ChevronDown,
   CornerRightDown,
   Maximize2,
-  Minimize,
   Minimize2,
+  Minus,
   X,
 } from "lucide-react";
 import {
@@ -170,7 +170,7 @@ const MinimizeButton = ({ windowId }: { windowId: number }) => {
       onClick={handleMinimize}
       className="size-3 rounded-full bg-yellow-400 hover:bg-yellow-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
     >
-      <Minimize className="size-2 text-yellow-800 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+      <Minus className="size-2 text-yellow-800 opacity-0 group-hover:opacity-100 transition-all duration-300" />
     </button>
   );
 };
