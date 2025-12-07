@@ -1,7 +1,7 @@
 import { cn } from "@/utils/cn";
 import React, { useEffect, useRef } from "react";
 
-interface EditBlurInputProps {
+interface EditBlurInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   isEditing: boolean;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   editingName: string;

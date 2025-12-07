@@ -2,19 +2,21 @@ import { Camera } from "lucide-react";
 import useAllWindows from "@/newtab/hooks/useAllWindows";
 import { useWorkspaceStore } from "@/newtab/store/workspace";
 import type { Workspace, WorkspaceGroup } from "@/newtab/types/workspace";
+import { useTranslation } from "react-i18next";
 
 const SnapshotButton = ({
   closeWindowsAfterSnapshot,
 }: {
   closeWindowsAfterSnapshot: boolean;
 }) => {
+  const { t } = useTranslation();
   const { allWindows } = useAllWindows();
   const { addWorkspace } = useWorkspaceStore();
 
   const handleSnapshot = async () => {
     try {
       if (allWindows.length === 0) {
-        alert("저장할 윈도우가 없습니다.");
+        alert(t("snapshot.noWindows"));
         return;
       }
 
@@ -25,7 +27,7 @@ const SnapshotButton = ({
           const groupId = crypto.randomUUID();
           return {
             id: groupId,
-            name: `윈도우 ${windowIndex + 1}`,
+            name: t("browser.windowTitle", { number: windowIndex + 1 }),
             // 스냅샷된 탭은 고유한 문자열 ID 부여 (실제 Chrome 탭과 구분)
             tabs: (window.tabs || []).map((tab, tabIndex) => ({
               ...tab,
@@ -35,20 +37,22 @@ const SnapshotButton = ({
         });
 
       if (groups.length === 0) {
-        alert("저장할 탭이 없습니다.");
+        alert(t("snapshot.noTabs"));
         return;
       }
 
       // 새 워크스페이스 생성
       const newWorkspace: Workspace = {
         id: crypto.randomUUID(),
-        name: `스냅샷 ${new Date().toLocaleString("ko-KR", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}`,
+        name: t("snapshot.defaultName", {
+          date: new Date().toLocaleString("ko-KR", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        }),
         createdAt: new Date().toISOString(),
         groups,
         groupViewMode: 1,
@@ -72,12 +76,10 @@ const SnapshotButton = ({
         }
       }
 
-      alert(
-        `${groups.length}개의 그룹이 새로운 워크스페이스에 저장되었습니다.`
-      );
+      alert(t("snapshot.success", { count: groups.length }));
     } catch (error) {
       console.error("스냅샷 생성 실패:", error);
-      alert("스냅샷 생성에 실패했습니다.");
+      alert(t("snapshot.fail"));
     }
   };
 
@@ -88,7 +90,7 @@ const SnapshotButton = ({
     >
       <Camera className="size-4" />
       <span className="opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap group-hover:ml-2 max-w-0 group-hover:max-w-20 overflow-hidden">
-        스냅샷
+        {t("snapshot.button")}
       </span>
     </button>
   );

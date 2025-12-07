@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { Workspace } from "@/newtab/types/workspace";
+import i18n from "@/newtab/i18n";
 
 interface WorkspaceStore {
   workspaces: Workspace[];
@@ -55,7 +56,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     const { workspaces } = get();
 
     if (workspaces.length === 1) {
-      alert("최소 1개의 워크스페이스는 유지되어야 합니다.");
+      alert(i18n.t("sidebar.minWorkspaceAlert"));
       return;
     }
 
@@ -63,7 +64,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       (workspace) => workspace.id === id
     )?.name;
     const result = confirm(
-      `[${workspaceName}] 워크스페이스를 삭제하시겠습니까?`
+      i18n.t("sidebar.deleteConfirm", { name: workspaceName })
     );
     if (!result) return;
 
@@ -88,7 +89,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       if (workspacesData.length === 0) {
         const defaultWorkspace: Workspace = {
           id: crypto.randomUUID(),
-          name: "나의 워크스페이스",
+          name: i18n.t("common.defaultWorkspace"),
           createdAt: new Date().toISOString(),
           groups: [],
           groupViewMode: 1,

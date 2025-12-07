@@ -2,7 +2,7 @@ import { cn } from "@/utils/cn";
 import { useEffect, useRef, useState } from "react";
 
 interface ResizeHandleProps {
-  onResize: React.Dispatch<React.SetStateAction<number>>;
+  onResize: (width: number) => void;
   strokeWidth?: number;
   minWidth?: number;
   maxWidth?: number;
@@ -97,8 +97,8 @@ const ResizeHandle = ({
         isHorizontal
           ? `w-full h-full cursor-col-resize`
           : `h-full w-full cursor-row-resize`,
-        "bg-slate-300 hover:bg-blue-400 transition-all duration-300 z-30 relative",
-        isResizing && "bg-blue-400",
+        "bg-slate-300 dark:bg-slate-600 hover:bg-blue-400 dark:hover:bg-blue-500 transition-all duration-300 z-30 relative",
+        isResizing && "bg-blue-400 dark:bg-blue-500",
         className
       )}
       onMouseDown={handleMouseDown}

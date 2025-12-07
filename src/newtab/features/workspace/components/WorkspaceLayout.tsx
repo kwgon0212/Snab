@@ -1,10 +1,10 @@
 import { useState } from "react";
-import ResizeHandle from "../../ui/ResizeHandle";
-import Sidebar from "./Sidebar";
+import ResizeHandle from "@/newtab/components/ui/ResizeHandle";
+import SidebarContainer from "../containers/SidebarContainer";
 import Content from "./Content";
 import ToggleSidebar from "./ToggleSidebar";
 
-const Workspace = () => {
+const WorkspaceLayout = () => {
   const [asideWidth, setAsideWidth] = useState(250);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -12,7 +12,7 @@ const Workspace = () => {
     <section className="flex-1 flex w-full">
       {!isCollapsed && (
         <>
-          <Sidebar width={asideWidth} />
+          <SidebarContainer width={asideWidth} />
           <ResizeHandle
             onResize={setAsideWidth}
             minWidth={200}
@@ -29,9 +29,10 @@ const Workspace = () => {
       <ToggleSidebar
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
+        width={asideWidth}
       />
     </section>
   );
 };
 
-export default Workspace;
+export default WorkspaceLayout;

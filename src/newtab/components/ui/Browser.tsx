@@ -16,6 +16,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import Tooltip from "./Tooltip";
+import { useTranslation } from "react-i18next";
 
 const BrowserUI = ({
   window,
@@ -24,6 +25,7 @@ const BrowserUI = ({
   window: chrome.windows.Window;
   index: number;
 }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
   const { setNodeRef, isOver } = useDroppable({
     id: `window-${window.id}`,
@@ -59,8 +61,9 @@ const BrowserUI = ({
           "rounded-lg relative",
           window.focused
             ? "border-blue-400 border-1"
-            : "border-slate-300 border-1",
-          shouldShowOverlay && "bg-blue-50 border-blue-500 border-dashed z-[5]"
+            : "border-slate-300 dark:border-slate-700 border-1",
+          shouldShowOverlay &&
+            "bg-blue-50 dark:bg-blue-900/50 border-blue-500 border-dashed z-[5]"
         )}
       >
         <div
@@ -72,7 +75,7 @@ const BrowserUI = ({
           )}
         >
           <p className="text-sm flex items-center gap-2">
-            여기에 탭을 Drop하세요
+            {t("browser.dropPlaceholder")}
             <CornerRightDown className="size-4" />
           </p>
         </div>
@@ -80,7 +83,7 @@ const BrowserUI = ({
         <div
           onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
-            "w-full flex items-center justify-between px-3 py-2 rounded-t-lg hover:bg-gray-50 transition-colors cursor-pointer bg-white",
+            "w-full flex items-center justify-between px-3 py-2 rounded-t-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer bg-white dark:bg-slate-800",
             isExpanded ? "rounded-b-none" : "rounded-b-lg"
           )}
         >
@@ -94,9 +97,9 @@ const BrowserUI = ({
                   windowState={window.state!}
                 />
               </div>
-              <h3 className="text-base text-slate-500 truncate">{`윈도우 #${
-                index + 1
-              }`}</h3>
+              <h3 className="text-base text-slate-500 dark:text-white truncate">
+                {t("browser.windowTitle", { number: index + 1 })}
+              </h3>
             </div>
 
             <ChevronDown
@@ -111,7 +114,7 @@ const BrowserUI = ({
         {/* 아코디언 컨텐츠 */}
         <div
           className={cn(
-            "w-full p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-250 ease-in-out bg-slate-100 rounded-b-md",
+            "w-full p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-250 ease-in-out rounded-b-md bg-slate-50 dark:bg-slate-900 border-t-0",
             isExpanded ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0 p-0"
           )}
         >
@@ -126,14 +129,14 @@ const BrowserUI = ({
                     chrome.tabs.update(tab.id!, { active: true });
                   }}
                   tabInfo={tab}
-                  className="intro-browser-tab"
+                  className="intro-browser-tab w-full shadow-sm hover:shadow-md transition-shadow duration-200 border-none ring-1 ring-slate-200 dark:ring-slate-700 dark:bg-slate-800"
                   origin={{ type: "window", id: window.id!.toString() }}
                 />
               ))}
             </>
           ) : (
             <div className="flex items-center justify-center h-full py-5">
-              <span className="text-slate-500">No tabs</span>
+              <span className="text-slate-500">{t("browser.noTabs")}</span>
             </div>
           )}
         </div>
@@ -145,13 +148,14 @@ const BrowserUI = ({
 export default BrowserUI;
 
 const CloseButton = ({ windowId }: { windowId: number }) => {
+  const { t } = useTranslation();
   const handleClose = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
     closeWindow(windowId);
   };
   return (
-    <Tooltip title="윈도우 닫기" position="bottom">
+    <Tooltip title={t("browser.closeWindow")} position="bottom">
       <button
         onClick={handleClose}
         className="size-3 rounded-full bg-red-400 hover:bg-red-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
@@ -163,13 +167,14 @@ const CloseButton = ({ windowId }: { windowId: number }) => {
 };
 
 const MinimizeButton = ({ windowId }: { windowId: number }) => {
+  const { t } = useTranslation();
   const handleMinimize = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
     minimizeWindow(windowId);
   };
   return (
-    <Tooltip title="윈도우 최소화" position="bottom">
+    <Tooltip title={t("browser.minimizeWindow")} position="bottom">
       <button
         onClick={handleMinimize}
         className="size-3 rounded-full bg-yellow-400 hover:bg-yellow-500 hover:scale-120 transition-all duration-300 flex items-center justify-center group"
@@ -187,6 +192,7 @@ const FullscreenToggleButton = ({
   windowId: number;
   windowState: chrome.windows.Window["state"];
 }) => {
+  const { t } = useTranslation();
   const isFullscreen = windowState === "fullscreen";
 
   const handleToggleFullscreen = async (
@@ -204,7 +210,9 @@ const FullscreenToggleButton = ({
 
   return (
     <Tooltip
-      title={isFullscreen ? "전체화면 해제" : "전체화면"}
+      title={
+        isFullscreen ? t("browser.exitFullscreen") : t("browser.fullscreen")
+      }
       position="bottom"
     >
       <button

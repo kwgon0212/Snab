@@ -1,0 +1,120 @@
+{
+  "header": {
+    "title": "Snab",
+    "subtitle": "Tab Management",
+    "snapshot": {
+      "label": "스냅샷 후 모든 윈도우",
+      "keep": "유지",
+      "close": "닫기"
+    },
+    "language": "언어"
+  },
+  "content": {
+    "selectWorkspace": "워크스페이스를 선택해주세요",
+    "totalGroups": "총 {{count}}개의 그룹",
+    "rename": "이름 수정",
+    "deleteWorkspace": "워크스페이스 삭제",
+    "groupView": "Group",
+    "tabView": "Tab",
+    "column1": "1열",
+    "column2": "2열",
+    "column3": "3열",
+    "noGroups": "그룹이 없습니다.",
+    "createGroupHint": "새로운 그룹을 생성해주세요."
+  },
+  "snapshot": {
+    "button": "스냅샷",
+    "noWindows": "저장할 윈도우가 없습니다.",
+    "noTabs": "저장할 탭이 없습니다.",
+    "defaultName": "스냅샷 {{date}}",
+    "success": "{{count}}개의 그룹이 새로운 워크스페이스에 저장되었습니다.",
+    "fail": "스냅샷 생성에 실패했습니다."
+  },
+  "groupCard": {
+    "dropPlaceholder": "여기에 탭을 놓아주세요",
+    "emptyGroup": "비어있는 그룹",
+    "editName": "그룹명 수정",
+    "openWindow": "새 창으로 열기",
+    "deleteGroup": "그룹 삭제",
+    "deleteConfirm": "'{{name}}' 그룹을 삭제하시겠습니까?"
+  },
+  "sidebar": {
+    "donation": "후원하기",
+    "addWorkspace": "워크스페이스 추가",
+    "deleteConfirm": "[{{name}}] 워크스페이스를 삭제하시겠습니까?",
+    "minWorkspaceAlert": "최소 1개의 워크스페이스는 유지되어야 합니다.",
+    "toggle": {
+      "open": "사이드바 열기",
+      "close": "사이드바 닫기"
+    },
+    "donationModal": {
+      "close": "닫기",
+      "message": "Snab이 도움이 되셨다면<br />커피 한 잔 어떠신지요 ㅎㅎ..",
+      "qrDesc": "QR 코드를 스캔하여 후원하기"
+    }
+  },
+  "windowSection": {
+    "totalWindows": "총 {{count}}개의 윈도우",
+    "currentWindow": "현재 윈도우",
+    "otherWindows": "나머지 윈도우",
+    "newWindow": "새 윈도우"
+  },
+  "options": {
+    "menu": "메뉴",
+    "exportJSON": "JSON 다운로드",
+    "importJSON": "JSON 업로드",
+    "tutorial": "튜토리얼 보기",
+    "exportSuccess": "데이터가 성공적으로 내보내졌습니다.",
+    "exportFail": "데이터 내보내기에 실패했습니다.",
+    "importSuccess": "데이터가 성공적으로 가져와졌습니다.",
+    "importFail": "데이터 가져오기에 실패했습니다."
+  },
+  "browser": {
+    "windowTitle": "윈도우 #{{number}}",
+    "dropPlaceholder": "여기에 탭을 놓아주세요",
+    "closeWindow": "윈도우 닫기",
+    "minimizeWindow": "윈도우 최소화",
+    "fullscreen": "전체화면",
+    "exitFullscreen": "전체화면 해제",
+    "noTabs": "탭 없음"
+  },
+  "tutorial": {
+    "buttons": {
+      "next": "다음",
+      "prev": "이전",
+      "done": "완료"
+    },
+    "confirmExit": "튜토리얼을 종료하시겠습니까?",
+    "steps": {
+      "snapshot": {
+        "title": "스냅샷",
+        "desc": "현재 열려있는 모든 브라우저를 새로운 워크스페이스에 그룹별로 저장합니다."
+      },
+      "snapshotOption": {
+        "title": "스냅샷 이후",
+        "desc": "스냅샷 후 현재 열려있는 모든 윈도우를 유지하거나 닫을 수 있습니다."
+      },
+      "options": {
+        "title": "옵션 메뉴",
+        "desc": "워크스페이스 데이터를 내보내거나 가져올 수 있고 사용법을 다시 볼 수 있습니다."
+      },
+      "windowHeader": {
+        "title": "윈도우 헤더",
+        "desc": "해당 브라우저 윈도우를 닫거나, 최소화, 전체화면 모드로 변경할 수 있습니다."
+      },
+      "tab": {
+        "title": "탭",
+        "desc": "탭을 드래그하여 순서 변경 및 이동이 가능합니다."
+      },
+      "donation": {
+        "title": "후원 버튼",
+        "desc": "후원을 통해 개발자에게 큰 힘이 됩니다."
+      }
+    }
+  },
+  "common": {
+    "confirm": "확인",
+    "cancel": "취소",
+    "defaultWorkspace": "나의 워크스페이스"
+  }
+}

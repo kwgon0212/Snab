@@ -1,12 +1,15 @@
 import logo from "@/assets/logo.png";
 import { version } from "@/../package.json";
 import { useEffect, useState } from "react";
-import Divider from "../ui/Divider";
 import Options from "./Options";
 import SnapshotButton from "./SnapshotButton";
 import Switch from "../ui/Switch";
+import LanguageSelector from "./LanguageSelector";
+import { useTranslation } from "react-i18next";
+import ThemeToggle from "./ThemeToggle";
 
 const Header = () => {
+  const { t } = useTranslation();
   const [closeWindowsAfterSnapshot, setCloseWindowsAfterSnapshot] =
     useState(false);
 
@@ -28,13 +31,19 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full h-16 shadow-sm bg-white flex items-center justify-between px-5 border-b border-gray-200">
+    <header className="w-full h-16 shadow-sm bg-white dark:bg-slate-950 flex items-center justify-between px-5 border-b border-gray-200 dark:border-slate-800 transition-colors duration-300">
       <div className="flex items-center gap-2">
         <img src={logo} alt="Snab" className="size-8 rounded" />
         <div className="flex items-baseline gap-2">
-          <h1 className="text-xl font-bold text-gray-800">Snab</h1>
-          <h2 className="text-sm text-gray-500">Tab Management</h2>
-          <h4 className="text-xs text-gray-400">v{version}</h4>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-slate-100">
+            {t("header.title")}
+          </h1>
+          <h2 className="text-sm text-gray-500 dark:text-slate-300">
+            {t("header.subtitle")}
+          </h2>
+          <h4 className="text-xs text-gray-400 dark:text-slate-400">
+            v{version}
+          </h4>
         </div>
       </div>
 
@@ -44,22 +53,28 @@ const Header = () => {
             closeWindowsAfterSnapshot={closeWindowsAfterSnapshot}
           />
 
-          <div className="intro-snapshot-option flex items-center gap-2">
-            <span className="text-xs text-gray-600 whitespace-nowrap">
-              스냅샷 후 모든 윈도우
+          <div className="intro-snapshot-option flex items-center gap-2 text-gray-500 dark:text-slate-400">
+            <span className="text-xs whitespace-nowrap">
+              {t("header.snapshot.label")}
             </span>
             <div className="flex items-center gap-1.5">
               <Switch
                 checked={closeWindowsAfterSnapshot}
                 onChange={handleToggle}
               />
-              <span className="text-xs text-gray-500">
-                {closeWindowsAfterSnapshot ? "유지" : "닫기"}
+              <span className="text-xs">
+                {closeWindowsAfterSnapshot
+                  ? t("header.snapshot.keep")
+                  : t("header.snapshot.close")}
               </span>
             </div>
           </div>
         </div>
-        <Divider direction="vertical" />
+
+        <LanguageSelector />
+
+        <ThemeToggle />
+
         <Options />
       </div>
     </header>

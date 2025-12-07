@@ -73,7 +73,7 @@ const Tooltip = ({
     <div
       ref={tooltipRef}
       className={cn(
-        "fixed bg-slate-700 text-white text-xs rounded-md px-2 py-1 shadow-lg z-[9999] whitespace-nowrap pointer-events-none",
+        "fixed bg-slate-700 dark:bg-slate-300 text-white dark:text-black text-xs rounded-md px-2 py-1 shadow-lg z-[9999] whitespace-nowrap pointer-events-none",
         "transition-opacity duration-200",
         isVisible ? "opacity-100" : "opacity-0"
       )}

@@ -85,7 +85,7 @@ const Tab = ({ id, onClick, tabInfo, origin, className }: TabProps) => {
       style={style}
       {...listeners}
       {...attributes}
-      className={`${className} group hover:shadow-md w-full px-3 py-2 bg-white rounded-md flex items-center gap-2 transition-shadow duration-200 ease-out cursor-pointer`}
+      className={`${className} group hover:shadow-md w-full px-3 py-2 bg-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-md flex items-center gap-2 transition-all duration-200 ease-out cursor-pointer dark:text-slate-200 ring-1 ring-slate-200 dark:ring-slate-700`}
       onClick={onClick}
     >
       {tabInfo.favIconUrl ? (
@@ -102,7 +102,7 @@ const Tab = ({ id, onClick, tabInfo, origin, className }: TabProps) => {
 
       <Divider direction="vertical" />
 
-      <span className="text-sm text-gray-500 truncate flex-1 text-start">
+      <span className="text-sm text-gray-500 dark:text-slate-300 truncate flex-1 text-start">
         {tabInfo.title}
       </span>
 
