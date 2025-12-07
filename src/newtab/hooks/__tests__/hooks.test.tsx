@@ -2,7 +2,6 @@ import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import useOutsideClick from "../useOutsideClick";
 import useAllWindows from "../useAllWindows";
-import { useRef } from "react";
 
 // Mock chrome API (if not already global)
 const chromeMock = {

@@ -1,6 +1,5 @@
 import { useThemeStore } from "@/newtab/store/theme";
 import { Moon, Sun, Monitor, Check } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import Tooltip from "@/newtab/components/ui/Tooltip";
 import { cn } from "@/utils/cn";
 import { useRef, useState } from "react";
@@ -8,7 +7,6 @@ import useOutsideClick from "@/newtab/hooks/useOutsideClick";
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useThemeStore();
-  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
