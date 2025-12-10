@@ -10,6 +10,7 @@ interface WorkspaceStore {
   addWorkspace: (workspace: Workspace) => void;
   updateWorkspace: (id: string, updates: Partial<Workspace>) => void;
   deleteWorkspace: (id: string) => void;
+  addGroup: () => void;
   loadWorkspaces: () => Promise<void>;
 }
 
@@ -79,6 +80,21 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
     // chrome.storage에 저장
     chrome.storage.local.set({ workspaces: newWorkspaces });
+  },
+
+  addGroup: () => {
+    const { activeWorkspace, updateWorkspace } = get();
+    if (!activeWorkspace) return;
+
+    const newGroup = {
+      id: crypto.randomUUID(),
+      name: i18n.t("groupCard.emptyGroup"),
+      tabs: [],
+    };
+
+    updateWorkspace(activeWorkspace.id, {
+      groups: [...activeWorkspace.groups, newGroup],
+    });
   },
 
   loadWorkspaces: async () => {

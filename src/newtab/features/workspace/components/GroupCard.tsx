@@ -97,7 +97,7 @@ const GroupCard = ({
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 px-3 py-2 bg-white dark:bg-slate-900 min-w-0 border-b border-transparent hover:border-slate-50 dark:hover:border-slate-800 transition-colors">
+      <div className="flex items-center justify-between gap-3 px-3 py-1 bg-white dark:bg-slate-900 min-w-0 border-b border-transparent hover:border-slate-50 dark:hover:border-slate-800 transition-colors">
         <div className="text-blue-600 dark:text-blue-400 rounded-xl flex-shrink-0 ml-2">
           <Folder className="size-5" strokeWidth={2} />
         </div>
@@ -153,7 +153,7 @@ const GroupCard = ({
       {/* Content */}
       <div
         className={cn(
-          "bg-slate-50/50 dark:bg-slate-950/50 px-3 pb-4 grid gap-2.5",
+          "bg-slate-50/50 dark:bg-slate-950/50 p-3 grid gap-2.5",
           tabViewMode === 1 && "grid-cols-1",
           tabViewMode === 2 && "grid-cols-2",
           tabViewMode === 3 && "grid-cols-3"

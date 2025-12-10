@@ -12,6 +12,7 @@
   "content": {
     "selectWorkspace": "워크스페이스를 선택해주세요",
     "totalGroups": "총 {{count}}개의 그룹",
+    "totalTabs": "총 {{count}}개의 탭",
     "rename": "이름 수정",
     "deleteWorkspace": "워크스페이스 삭제",
     "groupView": "Group",
@@ -20,7 +21,8 @@
     "column2": "2열",
     "column3": "3열",
     "noGroups": "그룹이 없습니다.",
-    "createGroupHint": "새로운 그룹을 생성해주세요."
+    "createGroupHint": "새로운 그룹을 생성해주세요.",
+    "addGroup": "그룹 추가"
   },
   "snapshot": {
     "button": "스냅샷",

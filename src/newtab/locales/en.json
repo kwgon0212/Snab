@@ -12,6 +12,7 @@
   "content": {
     "selectWorkspace": "Please select a workspace",
     "totalGroups": "Total {{count}} groups",
+    "totalTabs": "Total {{count}} tabs",
     "rename": "Rename",
     "deleteWorkspace": "Delete Workspace",
     "groupView": "Group",
@@ -20,7 +21,8 @@
     "column2": "2 Cols",
     "column3": "3 Cols",
     "noGroups": "No groups in this workspace.",
-    "createGroupHint": "Please create a new group."
+    "createGroupHint": "Please create a new group.",
+    "addGroup": "Add Group"
   },
   "snapshot": {
     "button": "Snapshot",

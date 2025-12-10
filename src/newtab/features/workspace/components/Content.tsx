@@ -3,7 +3,7 @@ import SegmentedControl from "@/newtab/components/ui/SegmentedControl";
 import GroupListContainer from "../containers/GroupListContainer";
 import { useWorkspaceStore } from "@/newtab/store/workspace";
 
-import { Trash2, Edit2 } from "lucide-react";
+import { Trash2, Edit2, Plus } from "lucide-react";
 import EditBlurInput from "@/newtab/components/ui/EditBlurInput";
 import Tooltip from "@/newtab/components/ui/Tooltip";
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,7 @@ const Content = () => {
   const { t } = useTranslation();
   // We can move this state to a container too if we want "ContentContainer",
   // but these seem like UI states specific to this view.
-  const { activeWorkspace, updateWorkspace, deleteWorkspace } =
+  const { activeWorkspace, updateWorkspace, deleteWorkspace, addGroup } =
     useWorkspaceStore();
 
   // Use activeWorkspace properties directly
@@ -90,9 +90,28 @@ const Content = () => {
               </Tooltip>
             </div>
           </div>
-          <p className="text-xs text-slate-400">
-            {t("content.totalGroups", { count: activeWorkspace.groups.length })}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-slate-400">
+              {t("content.totalGroups", {
+                count: activeWorkspace.groups.length,
+              })}{" "}
+              ·{" "}
+              {t("content.totalTabs", {
+                count: activeWorkspace.groups.reduce(
+                  (total, group) => total + group.tabs.length,
+                  0
+                ),
+              })}
+            </p>
+            <div className="w-[1px] h-3 bg-slate-300 dark:bg-slate-700" />
+            <button
+              onClick={addGroup}
+              className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+            >
+              <Plus className="size-3" />
+              <span>{t("content.addGroup")}</span>
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
